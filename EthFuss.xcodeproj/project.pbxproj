@@ -27,6 +27,7 @@
 		21A504FD2CFC838900A95494 /* EthFuss.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EthFuss.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21A5050F2CFC838D00A95494 /* EthFussTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EthFussTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21A505192CFC838E00A95494 /* EthFussUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EthFussUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		21A5052F2CFC852900A95494 /* EthCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = EthCore; path = EthCore/EthCore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +76,7 @@
 		21A504F42CFC838900A95494 = {
 			isa = PBXGroup;
 			children = (
+				21A5052F2CFC852900A95494 /* EthCore */,
 				21A504FF2CFC838900A95494 /* EthFuss */,
 				21A505122CFC838D00A95494 /* EthFussTests */,
 				21A5051C2CFC838E00A95494 /* EthFussUITests */,
@@ -106,6 +108,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				21A505312CFC86D800A95494 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				21A504FF2CFC838900A95494 /* EthFuss */,
@@ -195,6 +198,9 @@
 			);
 			mainGroup = 21A504F42CFC838900A95494;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				21A5052C2CFC848200A95494 /* XCLocalSwiftPackageReference "EthCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 21A504FE2CFC838900A95494 /* Products */;
 			projectDirPath = "";
@@ -265,6 +271,10 @@
 			isa = PBXTargetDependency;
 			target = 21A504FC2CFC838900A95494 /* EthFuss */;
 			targetProxy = 21A5051A2CFC838E00A95494 /* PBXContainerItemProxy */;
+		};
+		21A505312CFC86D800A95494 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 21A505302CFC86D800A95494 /* EthCore */;
 		};
 /* End PBXTargetDependency section */
 
@@ -558,6 +568,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		21A5052C2CFC848200A95494 /* XCLocalSwiftPackageReference "EthCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = EthCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		21A505302CFC86D800A95494 /* EthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21A5052C2CFC848200A95494 /* XCLocalSwiftPackageReference "EthCore" */;
+			productName = EthCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 21A504F52CFC838900A95494 /* Project object */;
 }
