@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2139096E2CFCE3B5000C68D8 /* EthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2139096D2CFCE3B5000C68D8 /* EthCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		21A505102CFC838D00A95494 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -53,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2139096E2CFCE3B5000C68D8 /* EthCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +120,7 @@
 			);
 			name = EthFuss;
 			packageProductDependencies = (
+				2139096D2CFCE3B5000C68D8 /* EthCore */,
 			);
 			productName = EthFuss;
 			productReference = 21A504FD2CFC838900A95494 /* EthFuss.app */;
@@ -577,6 +583,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2139096D2CFCE3B5000C68D8 /* EthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EthCore;
+		};
 		21A505302CFC86D800A95494 /* EthCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 21A5052C2CFC848200A95494 /* XCLocalSwiftPackageReference "EthCore" */;

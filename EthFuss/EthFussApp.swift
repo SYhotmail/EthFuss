@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import EthCore
 
 @main
 struct EthFussApp: App {
@@ -26,6 +27,16 @@ struct EthFussApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    let connector = EthConnector()
+                    do {
+                        let result = try await connector.ethBlockNumber()
+                        debugPrint("!!! result \(result)")
+                    }
+                    catch {
+                        debugPrint("!!! Error \(error)")
+                    }
+                }
         }
         .modelContainer(sharedModelContainer)
     }

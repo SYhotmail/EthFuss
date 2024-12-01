@@ -7,21 +7,24 @@
 
 import Foundation
 
-struct JSONRPCVersionInfo: Codable {
+public struct JSONRPCVersionInfo: Sendable {
     
     let major: UInt
     let minor: UInt
     let bugFixRelease: UInt?
     let buildNumber: UInt?
     
-    init(major: UInt, minor: UInt = 0, bugFixRelease: UInt? = nil, buildNumber: UInt? = nil) {
+    public init(major: UInt, minor: UInt = 0, bugFixRelease: UInt? = nil, buildNumber: UInt? = nil) {
         self.major = major
         self.minor = minor
         self.bugFixRelease = bugFixRelease
         self.buildNumber = buildNumber
     }
     
-    init(from decoder: Decoder) throws {
+}
+ 
+extension JSONRPCVersionInfo: Codable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let raw = try container.decode(String.self)
         
@@ -45,7 +48,7 @@ struct JSONRPCVersionInfo: Codable {
                   buildNumber: values.count == maxCount ? values[maxCount - 1] : nil)
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         
         let parts = [major as UInt?,

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct EthMethodResult<T> {
+public struct EthMethodResult<T> {
     /// jsonrpc
     let id: UInt64
     let version: JSONRPCVersionInfo
@@ -20,12 +20,15 @@ struct EthMethodResult<T> {
     }
 }
 
+extension EthMethodResult: Sendable where T: Sendable {
+}
+
 extension EthMethodResult: Decodable where T: Decodable {
     enum CodingKeys: String, CodingKey {
         case result
     }
     
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
         
         let base = try BaseJSONRPC(from: decoder)

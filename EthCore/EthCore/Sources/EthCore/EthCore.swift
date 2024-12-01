@@ -3,14 +3,14 @@
 
 import Foundation
 
-struct EthConnector {
+public struct EthConnector: Sendable {
     /// configuration: configuration of the network...
     let ethConfig: EthConfiguration
     
     let network: URLSession
     let postRequest: URLRequest
     
-    init(ethConfig: EthConfiguration, config: URLSessionConfiguration? = nil) {
+    public init(ethConfig: EthConfiguration = .init(url: EthConfiguration.Test.sepolia.url), config: URLSessionConfiguration? = nil) {
         self.ethConfig = ethConfig
         let url = ethConfig.url
         
@@ -22,7 +22,7 @@ struct EthConnector {
     }
     
     //eth_blockNumber
-    func ethBlockNumber(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
+    public func ethBlockNumber(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
         let id = idCore ?? .random(in: UInt64.min...UInt64.max)
         let params = EthMethodParams<Int>(id: id,
                                           version: ethConfig.jsonRPCVersion,
@@ -65,7 +65,7 @@ struct EthConnector {
     }
 }
 
-enum EthError: Error {
+public enum EthError: Error {
     case invalidResponse(_ data: Data?)
     case httpStatusCode(_ code: Int)
     case invalidId(expected: UInt64, real: UInt64?)
@@ -76,8 +76,8 @@ enum EthError: Error {
     }
 }
 
-struct EthConfiguration {
-    enum Test {
+public struct EthConfiguration: Sendable {
+    public enum Test {
         case sepolia
         
         var host: String {
@@ -87,7 +87,7 @@ struct EthConfiguration {
             }
         }
         
-        var url: URL! {
+        public var url: URL! {
             var components = URLComponents()
             components.scheme = "https"
             components.host = host
@@ -97,5 +97,12 @@ struct EthConfiguration {
     
     /// url of the network.
     let url: URL
-    var jsonRPCVersion = JSONRPCVersionInfo(major: 2, minor: 0)
+    let jsonRPCVersion: JSONRPCVersionInfo
+    
+    public init(url: URL,
+                jsonRPCVersion: JSONRPCVersionInfo = .init(major: 2,
+                                                           minor: 0)) {
+        self.url = url
+        self.jsonRPCVersion = jsonRPCVersion
+    }
 }
