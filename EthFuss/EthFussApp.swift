@@ -30,7 +30,7 @@ struct EthFussApp: App {
                 .task {
                     let connector = EthConnector()
                     do {
-                        let result = try await connector.ethBlockNumber()
+                        let result = try await connector.ethBlobBaseFee()
                         debugPrint("!!! result \(result)")
                     }
                     catch {

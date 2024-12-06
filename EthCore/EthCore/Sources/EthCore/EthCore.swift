@@ -21,12 +21,11 @@ public struct EthConnector: Sendable {
         self.network = .init(configuration: config ?? .default)
     }
     
-    //eth_blockNumber
-    public func ethBlockNumber(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
+    private func ethMethodRun(id idCore: UInt64? = nil, method: EthMethod) async throws -> EthMethodResult<UInt64> {
         let id = idCore ?? .random(in: UInt64.min...UInt64.max)
         let params = EthMethodParams<Int>(id: id,
                                           version: ethConfig.jsonRPCVersion,
-                                          method: .gossip(.blockNumber))
+                                          method: method)
         let encoder = JSONEncoder()
         let data = try encoder.encode(params)
         
@@ -47,21 +46,37 @@ public struct EthConnector: Sendable {
         }
         
         let decoder = JSONDecoder()
-        let result = try decoder.decode(EthMethodResult<String>.self, from: responseData)
-        
+        let result = try decoder.decode(EthMethodSwiftResult<String>.self, from: responseData)
         guard result.id == id else {
             throw EthError.invalidId(expected: id, real: result.id)
         }
         
-        return try result.mapResult { raw in
-            let prefixStr = "0x"
-            let cleanedHexString = raw.hasPrefix(prefixStr) ? String(raw.dropFirst(prefixStr.count)) : raw
-            
-            guard let value = UInt64(cleanedHexString, radix: 16) else {
-                throw EthError.invalidResponse(raw.data(using: .utf8))
+        let rawResult = try result.methodResult()
+        
+        return try rawResult.mapResult { text in 
+            guard let value = try text.hexToUInt64() else {
+                throw EthError.invalidResponse(from: text)
             }
             return value
         }
+    }
+    
+    //eth_blockNumber
+    public func ethBlockNumber(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
+        try await ethMethodRun(id: idCore, method: .gossip(.blockNumber))
+    }
+    
+    public func ethBlobBaseFee(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
+        try await ethMethodRun(id: idCore, method: .gossip(.blobBaseFee))
+    }
+}
+
+public struct EthereumError: Error, Sendable, Decodable {
+    public let code: Int
+    public let message: String
+    
+    public var isNotAvailable: Bool {
+        -32601 == code
     }
 }
 
@@ -69,10 +84,18 @@ public enum EthError: Error {
     case invalidResponse(_ data: Data?)
     case httpStatusCode(_ code: Int)
     case invalidId(expected: UInt64, real: UInt64?)
+    case ethereumError(model: EthereumError)
     
     static func invalidResponse(from text: String) -> Self {
         let data = text.data(using: .utf8)
         return .invalidResponse(data)
+    }
+    
+    var ethereumError: EthereumError? {
+        if case .ethereumError(let innerError) = self {
+            return innerError
+        }
+        return nil
     }
 }
 

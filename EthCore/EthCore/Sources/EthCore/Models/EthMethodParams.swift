@@ -44,12 +44,13 @@ enum EthMethod {
     var name: String {
         switch self {
         case .gossip(let method):
-            return method.rawValue
+            return "eth_\(method.rawValue)"
         }
     }
     
     enum Gossip: String {
-        case blockNumber = "eth_blockNumber"
+        case blockNumber
+        case blobBaseFee
     }
     
     case gossip(_ method: Gossip)

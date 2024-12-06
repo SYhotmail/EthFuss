@@ -140,9 +140,87 @@ struct EthTopologhyView: View {
                  
     let approximateDefaultDuration = TimeInterval(0.35)
     
-    
+    @State var displayPartId: String!
     
     var body: some View {
+        GeometryReader { reader in
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal.union(.vertical)) {
+                    LazyHStack(spacing: 0) {
+                        bodyLeftPart
+                            .frame(size: reader.size)
+                            .id("left")
+                        bodyRightPart
+                            .frame(size: reader.size)
+                            .id("right")
+                            .padding(.horizontal, 10)
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .onAppear {
+                    displayPartId = "left"
+                }
+                .onChange(of: displayPartId) { oldValue, newValue in
+                    guard oldValue != newValue, let newValue else {
+                        return
+                    }
+                    
+                    withAnimation(.default) {
+                        proxy.scrollTo(newValue, anchor: .leading)
+                    } completion: {
+                        swapDisplayPartId()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func swapDisplayPartId() {
+        guard displayPartId == "left" else {
+            return
+        }
+        
+        Task { @MainActor in
+            displayPartId = "right"
+        }
+    }
+    
+    @ViewBuilder
+    private func computerView() -> some View {
+        Image(systemName: "desktopcomputer")
+        //.tint(.red)
+            .aspectRatio(contentMode: .fill)
+            .scaledToFill()
+            .scaleEffect(animateNodes ? 1.5 : 0)
+            .symbolEffect(.bounce, value: 2)
+            .background(Capsule().fill(Color.white))
+    }
+    
+    var bodyLeftPart: some View {
+        GeometryReader { proxy in
+            ZStack {
+                Color(.systemBackground)
+                
+                HStack(spacing: 0) {
+                    computerView().alignmentGuide(.top) { dimensions in
+                        dimensions[.top] + 50
+                    }.padding(.horizontal, 10)
+                    CloudShape()
+                                .fill(Color.blue.opacity(0.3))
+                                .overlay(
+                                    CloudShape()
+                                        .stroke(Color.blue,
+                                                lineWidth: 2)
+                                )
+                                .padding()
+                }
+                
+            }
+        }
+    }
+    
+    
+    var bodyRightPart: some View {
         GeometryReader { proxy in
             
             ZStack {
@@ -150,18 +228,11 @@ struct EthTopologhyView: View {
                 
                 ComputerConnectorsView(startDelay: 5,
                                        size: proxy.size)
-                
                 //Computers...
                 Group {
                     ForEach(0..<normalizedPositions.count, id: \.self) { index in
                         let position = normalizedPositions[index]
-                        Image(systemName: "desktopcomputer")
-                        //.tint(.red)
-                            .aspectRatio(contentMode: .fill)
-                            .scaledToFill()
-                            .scaleEffect(animateNodes ? 1.5 : 0)
-                            .symbolEffect(.bounce, value: 2)
-                            .background(Capsule().fill(Color.white))
+                        computerView()
                             .position(x: proxy.size.width * position.x,
                                       y: proxy.size.height * position.y)
                             .animation(.default.delay(Double((index + 1)) * delay), value: animateNodes)
@@ -200,4 +271,47 @@ struct EthTopologhyView: View {
 
 #Preview {
     EthTopologhyView()
+}
+
+// MARK: - CloudShape
+struct CloudShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            let width = rect.width
+            let height = rect.height
+            
+            // Cloud base
+            path.addEllipse(in: CGRect(x: width * 0.25,
+                                       y: height * 0.5,
+                                       width: width * 0.5,
+                                       height: height * 0.4))
+            
+            // Left puff
+            path.addEllipse(in: CGRect(x: width * 0.1,
+                                       y: height * 0.4,
+                                       width: width * 0.35,
+                                       height: height * 0.5))
+            
+            // Right puff
+            path.addEllipse(in: CGRect(x: width * 0.55,
+                                       y: height * 0.4,
+                                       width: width * 0.35,
+                                       height: height * 0.5))
+            
+            // Top puff
+            path.addEllipse(in: CGRect(x: width * 0.3,
+                                       y: height * 0.2,
+                                       width: width * 0.4,
+                                       height: height * 0.5))
+        }
+    }
+}
+
+extension View {
+    func frame(size: CGSize,
+               alignment: Alignment = .center) -> some View {
+        frame(width: size.width,
+              height: size.height,
+              alignment: alignment)
+    }
 }

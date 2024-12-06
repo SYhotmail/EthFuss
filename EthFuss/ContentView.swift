@@ -14,6 +14,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
+            /*
             List {
                 ForEach(items) { item in
                     NavigationLink {
@@ -35,6 +36,8 @@ struct ContentView: View {
                     }
                 }
             }
+             */
+            EthTopologhyView()
         } detail: {
             Text("Select an item")
         }
