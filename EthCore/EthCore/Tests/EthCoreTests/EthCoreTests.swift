@@ -20,7 +20,7 @@ private func sepoliaTestConnector() -> EthConnector {
     do {
         _ = try await connector.ethBlobBaseFee()
     } catch {
-        if case EthError.ethereumError(model: let model) = error, model.isNotAvailable {
+        if case EthError.ethereumError(model: let model) = error, model.code == .methodNotFound {
             return
         }
     }

@@ -71,34 +71,6 @@ public struct EthConnector: Sendable {
     }
 }
 
-public struct EthereumError: Error, Sendable, Decodable {
-    public let code: Int
-    public let message: String
-    
-    public var isNotAvailable: Bool {
-        -32601 == code
-    }
-}
-
-public enum EthError: Error {
-    case invalidResponse(_ data: Data?)
-    case httpStatusCode(_ code: Int)
-    case invalidId(expected: UInt64, real: UInt64?)
-    case ethereumError(model: EthereumError)
-    
-    static func invalidResponse(from text: String) -> Self {
-        let data = text.data(using: .utf8)
-        return .invalidResponse(data)
-    }
-    
-    var ethereumError: EthereumError? {
-        if case .ethereumError(let innerError) = self {
-            return innerError
-        }
-        return nil
-    }
-}
-
 public struct EthConfiguration: Sendable {
     public enum Test {
         case sepolia
