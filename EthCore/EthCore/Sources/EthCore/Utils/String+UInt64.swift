@@ -8,9 +8,8 @@
 import Foundation
 
 extension String {
-    func hexToUInt64() throws -> UInt64? {
+    func hexToUInt64(prefix prefixStr: String = "0x") throws -> UInt64? {
         let raw = self
-        let prefixStr = "0x"
         let cleanedHexString = raw.hasPrefix(prefixStr) ? String(raw.dropFirst(prefixStr.count)) : raw
         
         guard let value = UInt64(cleanedHexString, radix: 16) else {

@@ -20,13 +20,18 @@ public struct EthConnector: Sendable {
         self.postRequest = postRequest
         self.network = .init(configuration: config ?? .default)
     }
-    
-    private func ethMethodRun(id idCore: UInt64? = nil, method: EthMethod) async throws -> EthMethodResult<UInt64> {
+   
+    /*
+    private func ethMethodRun(id idCore: UInt64? = nil, method: EthMethod, params: [any Encodable]) async throws -> EthMethodResult<UInt64> {
         let id = idCore ?? .random(in: UInt64.min...UInt64.max)
-        let params = EthMethodParams<Int>(id: id,
-                                          version: ethConfig.jsonRPCVersion,
-                                          method: method)
+        let params = EthMethodParams<[any Encodable]>(id: id,
+                                                      version: ethConfig.jsonRPCVersion,
+                                                      method: method)
         let encoder = JSONEncoder()
+        encoder.dataEncodingStrategy = .custom({ data, encoder in
+            
+        })
+        
         let data = try encoder.encode(params)
         
         var request = postRequest
@@ -53,6 +58,53 @@ public struct EthConnector: Sendable {
         
         let rawResult = try result.methodResult()
         
+        return try rawResult.mapResult { text in
+            guard let value = try text.hexToUInt64() else {
+                throw EthError.invalidResponse(from: text)
+            }
+            return value
+        }
+    }
+    */
+    
+    
+    private func ethMethodParams<Params: Encodable, Result: Decodable>(id idCore: UInt64? = nil, method: EthMethod, params: Params) async throws -> EthMethodResult<Result> {
+        let id = idCore ?? .random(in: UInt64.min...UInt64.max)
+        let params = EthMethodParams(id: id,
+                                     version: ethConfig.jsonRPCVersion,
+                                     method: method,
+                                     params: params)
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(params)
+        
+        var request = postRequest
+        request.httpBody = data
+        
+        let tuple = try await network.data(for: request)
+        
+        let responseData = tuple.0
+        let response = tuple.1
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw EthError.invalidResponse(responseData)
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            throw EthError.httpStatusCode(httpResponse.statusCode)
+        }
+        
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(EthMethodSwiftResult<Result>.self, from: responseData)
+        guard result.id == id else {
+            throw EthError.invalidId(expected: id, real: result.id)
+        }
+        
+        return try result.methodResult()
+    }
+    
+    private func ethMethodRun(id idCore: UInt64? = nil, method: EthMethod) async throws -> EthMethodResult<UInt64> {
+        let rawResult: EthMethodResult<String> = try await ethMethodParams(id: idCore, method: method, params: [UInt64]())
+        
         return try rawResult.mapResult { text in 
             guard let value = try text.hexToUInt64() else {
                 throw EthError.invalidResponse(from: text)
@@ -68,6 +120,14 @@ public struct EthConnector: Sendable {
     
     public func ethBlobBaseFee(id idCore: UInt64? = nil) async throws -> EthMethodResult<UInt64> {
         try await ethMethodRun(id: idCore, method: .gossip(.blobBaseFee))
+    }
+    
+    public func ethBlockByNumber(id idCore: UInt64? = nil, tag: BlockTag = .latest, full: Bool = false) async throws {
+        //TODO: provide here...
+    }
+    
+    public func ethAccounts(id idCore: UInt64? = nil) async throws -> EthMethodResult<[String]> {
+        try await ethMethodParams(id: idCore, method: .gossip(.accounts), params: [UInt64]())
     }
 }
 

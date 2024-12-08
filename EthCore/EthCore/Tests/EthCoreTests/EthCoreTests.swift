@@ -27,3 +27,9 @@ private func sepoliaTestConnector() -> EthConnector {
     
     throw EthError.invalidResponse(nil)
 }
+
+@Test func getAccountsTest() async throws {
+    let connector = sepoliaTestConnector()
+    let results = try await connector.ethAccounts().result
+    #expect(results.isEmpty, "Node should not return cashed accounts?")
+}

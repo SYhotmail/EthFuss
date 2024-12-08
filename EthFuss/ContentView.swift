@@ -13,8 +13,13 @@ struct ContentView: View {
     @Query private var items: [Item]
 
     var body: some View {
-        NavigationSplitView {
-            /*
+        ScrollView {
+            VStack(spacing: 0) {
+                
+            }
+        }
+        
+        /*NavigationSplitView {
             List {
                 ForEach(items) { item in
                     NavigationLink {
@@ -36,11 +41,10 @@ struct ContentView: View {
                     }
                 }
             }
-             */
             EthTopologhyView()
         } detail: {
             Text("Select an item")
-        }
+        } */
     }
 
     private func addItem() {
