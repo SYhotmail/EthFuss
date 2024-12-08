@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension UInt64 {
+public extension UInt64 {
     func hexString(prefix prefixStr: String = "0x") -> String {
         prefixStr + String(self, radix: 16)
     }

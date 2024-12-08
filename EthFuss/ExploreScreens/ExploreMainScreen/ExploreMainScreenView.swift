@@ -8,16 +8,50 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
+struct ExploreMainScreenView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    @ObservedObject var viewModel: ExploreMainScreenViewModel
+    
+    @ViewBuilder
+    func blockView(_ block: ExploreMainScreenViewModel.BlockItem) -> some View {
+        HStack {
+            Image(systemName: "cube.fill")
+            
+            VStack {
+                Button {
+                    //action...
+                } label: {
+                    Text(block.blockNumber.flatMap { "\($0)" } ?? "")
+                        .foregroundStyle(Color.primary)
+                }
 
+                
+            }
+            Spacer()
+        }
+    }
+    
+    
     var body: some View {
-        ScrollView {
+        NavigationStack {
             VStack(spacing: 0) {
+                
+                List {
+                    Section {
+                        ForEach(viewModel.latestBlocks) { block in
+                            blockView(block)
+                        }
+                    } header: {
+                        Text("Latest Blocks")
+                    }.clipShape(.rect(cornerRadius: 5))
+                    
+                }.listStyle(.insetGrouped)
+                    .navigationTitle("See result")
                 
             }
         }
+        
         
         /*NavigationSplitView {
             List {
@@ -47,23 +81,10 @@ struct ContentView: View {
         } */
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
 }
 
 #Preview {
-    ContentView()
+    ExploreMainScreenView(viewModel: .init(blockCount: 0,
+                                           transactionCount: 0))
         .modelContainer(for: Item.self, inMemory: true)
 }

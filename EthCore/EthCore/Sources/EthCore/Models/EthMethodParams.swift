@@ -36,24 +36,6 @@ extension EthMethodParams {
     }
 }
 
-
-/*struct EthMethodParams<T> {
-    let id: UInt64
-    let version: JSONRPCVersionInfo
-    let method: EthMethod
-    let params: [T]
-    
-    init(id: UInt64,
-         version: JSONRPCVersionInfo,
-         method: EthMethod,
-         params: [T] = []) {
-        self.id = id
-        self.version = version
-        self.method = method
-        self.params = params
-    }
-}*/
-
 extension EthMethodParams: Encodable where U: Encodable {
     enum CodingKeys: CodingKey {
         case method
@@ -110,7 +92,7 @@ enum EthMethod {
         case .gossip(let method):
             return "eth_\(method.rawValue)"
         case .history(let method):
-            return "eth_get\(method.rawValue.capitalized)"
+            return "eth_get\(method.rawValue.capitalizeFirstLetter())"
         }
     }
     
@@ -126,4 +108,26 @@ enum EthMethod {
     
     case gossip(_ method: Gossip)
     case history(_ method: History)
+}
+
+struct EncodableItemWrapper: Encodable {
+    let items: [EncodableValue]
+}
+
+enum EncodableValue: Encodable {
+    case int(Int)
+    case string(String)
+    case bool(Bool)
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .int(let value):
+            try container.encode(value)
+        case .string(let value):
+            try container.encode(value)
+        case .bool(let value):
+            try container.encode(value)
+        }
+    }
 }

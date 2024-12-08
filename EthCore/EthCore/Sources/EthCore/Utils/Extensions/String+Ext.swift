@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     func hexToUInt64(prefix prefixStr: String = "0x") throws -> UInt64? {
         let raw = self
         let cleanedHexString = raw.hasPrefix(prefixStr) ? String(raw.dropFirst(prefixStr.count)) : raw
@@ -16,5 +16,16 @@ extension String {
             throw EthError.invalidResponse(raw.data(using: .utf8))
         }
         return value
+    }
+}
+
+extension String {
+    func capitalizeFirstLetter() -> Self {
+        let text = self
+        guard !text.isEmpty else {
+            return text
+        }
+        
+        return text.prefix(1).uppercased() + text.dropFirst()
     }
 }

@@ -26,17 +26,7 @@ struct EthFussApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .task {
-                    let connector = EthConnector()
-                    do {
-                        let result = try await connector.ethBlobBaseFee()
-                        debugPrint("!!! result \(result)")
-                    }
-                    catch {
-                        debugPrint("!!! Error \(error)")
-                    }
-                }
+            ExploreMainScreenView(viewModel: .init())
         }
         .modelContainer(sharedModelContainer)
     }

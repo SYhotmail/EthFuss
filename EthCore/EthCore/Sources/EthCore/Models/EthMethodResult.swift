@@ -64,3 +64,9 @@ extension EthMethodSwiftResult: Decodable where T: Decodable {
                   result: result)
     }
 }
+
+
+public struct EthBlockObjectResult: Decodable, Sendable {
+    public let miner: String //20bytes.. - 42 characters...
+    public let number: String?
+}
