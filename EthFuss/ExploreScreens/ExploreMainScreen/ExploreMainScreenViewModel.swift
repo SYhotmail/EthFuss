@@ -15,6 +15,11 @@ final class ExploreMainScreenViewModel: ObservableObject {
         case mined
     }
     
+    struct TransactionItem: Identifiable {
+        let hash: String
+        var id: String { hash }
+    }
+    
     struct BlockItem: Identifiable {
         let id: String
         let blockNumber: UInt64?
@@ -43,6 +48,7 @@ final class ExploreMainScreenViewModel: ObservableObject {
     }
     
     @Published var latestBlocks = [BlockItem]()
+    @Published var transactions = [TransactionItem]()
     
     let connector = EthConnector()
     let blockCount: Int
@@ -88,7 +94,7 @@ final class ExploreMainScreenViewModel: ObservableObject {
         let items = try await withThrowingTaskGroup(of: EthBlockObjectResult.self) { group in
             for i in 0..<number {
                 _ = group.addTaskUnlessCancelled {
-                    try await self.connector.ethBlockByNumber(tag: .quantity(blockNumber - UInt64(i)) ,full: i == 0 && false).result
+                    try await self.connector.ethBlockByNumber(tag: .quantity(blockNumber - UInt64(i)) ,full: i == 0).result
                 }
             }
             var results = [EthBlockObjectResult]()

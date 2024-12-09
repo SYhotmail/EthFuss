@@ -68,19 +68,19 @@ extension EthMethodSwiftResult: Decodable where T: Decodable {
 public struct EthTransactionObjectResult: Decodable, Sendable {
     // Common Fields
     public let hash: String             // Transaction hash
-    public let nonce: UInt64            // Transaction nonce
+    public let nonce: String            // Transaction nonce
     public let blockHash: String?       // Hash of the block containing this transaction
-    public let blockNumber: UInt64?     // Block number (optional if pending)
-    public let transactionIndex: UInt64? // Index of the transaction in the block
+    public let blockNumber: String?     // Block number (optional if pending)
+    public let transactionIndex: String? // Index of the transaction in the block
     
     public let from: String             // Sender's address
     public let to: String?              // Recipient's address (nil for contract creation)
     public let value: String            // Value transferred in wei (String to avoid precision issues)
-    public let gas: UInt64              // Gas limit
+    public let gas: String              // Gas limit
     public let gasPrice: String         // Gas price in wei (String to avoid precision issues)
     
     // Optional Fields for Input and Signature
-    public let input: String            // Data payload (hex string)
+    public let input: String?            // Data payload (hex string)
     public let v: String?               // Recovery ID (part of the signature)
     public let r: String?               // ECDSA signature r value
     public let s: String?               // ECDSA signature s value

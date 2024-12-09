@@ -65,8 +65,10 @@ struct ExploreMainScreenView: View {
                     }
                     
                     Section {
-                        ForEach(viewModel.latestBlocks) { block in
-                            blockView(block)
+                        ForEach(viewModel.transactions) { transaction in
+                            //blockView(block)
+                            //TODO:
+                            Text("Add support")
                         }
                     } header: {
                         Text("Latest Transactions")
