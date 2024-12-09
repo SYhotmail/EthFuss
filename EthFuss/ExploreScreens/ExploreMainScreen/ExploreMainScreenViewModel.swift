@@ -10,13 +10,35 @@ import EthCore
 
 final class ExploreMainScreenViewModel: ObservableObject {
     
+    enum BlockState {
+        case pending
+        case mined
+    }
+    
     struct BlockItem: Identifiable {
         let id: String
         let blockNumber: UInt64?
+        let timestamp: String
+        let blockState: BlockState
         
-        init(blockNumber: UInt64?) {
+        init(blockNumber: UInt64?,
+             unixTimestamp: TimeInterval) {
             self.blockNumber = blockNumber
             self.id = blockNumber?.hexString() ?? UUID().uuidString
+            
+            blockState = blockNumber != 0 ? .mined : .pending
+            
+            let interval = Date(timeIntervalSince1970: unixTimestamp).timeIntervalSinceNow
+            assert(interval <= 0)
+            timestamp = String(format: "%0.f mins ago", abs(interval/60)) //TODO: support localization etc...
+        }
+        
+        init?(blockObject: EthBlockObjectResult) {
+            guard let unixTimestampRaw = try? blockObject.timestamp.hexToUInt64() else {
+                return nil
+            }
+            self.init(blockNumber: try? blockObject.number?.hexToUInt64(),
+                      unixTimestamp: TimeInterval(unixTimestampRaw))
         }
     }
     
@@ -66,7 +88,7 @@ final class ExploreMainScreenViewModel: ObservableObject {
         let items = try await withThrowingTaskGroup(of: EthBlockObjectResult.self) { group in
             for i in 0..<number {
                 _ = group.addTaskUnlessCancelled {
-                    try await self.connector.ethBlockByNumber(tag: .quantity(blockNumber - UInt64(i)) ,full: false).result
+                    try await self.connector.ethBlockByNumber(tag: .quantity(blockNumber - UInt64(i)) ,full: i == 0 && false).result
                 }
             }
             var results = [EthBlockObjectResult]()
@@ -75,20 +97,15 @@ final class ExploreMainScreenViewModel: ObservableObject {
                 return results
             }
             
-            /*while let result = try await group.next() {
-                ///        collected += value
-                ///     }
-                results.append(result)
-            }*/
-            
             for try await result in group {
                 results.append(result)
             }
             return results
         }
         
-        //withTaskGroup(of: <#T##Sendable.Type#>, returning: <#T##GroupResult.Type#>, body: <#T##(inout TaskGroup<Sendable>) async -> GroupResult#>)
-        
-        return items.map { BlockItem(blockNumber: try? $0.number?.hexToUInt64()) }.sorted { $0.id > $1.id } // last at top..
+        let count = items.count
+        let retArray = items.compactMap { BlockItem(blockObject: $0) }.sorted { $0.id > $1.id } // last at top..
+        assert(count == retArray.count) //all blocks are not pending?
+        return retArray
     }
 }

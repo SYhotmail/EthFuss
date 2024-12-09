@@ -22,11 +22,13 @@ struct ExploreMainScreenView: View {
                 Button {
                     //action...
                 } label: {
-                    Text(block.blockNumber.flatMap { "\($0)" } ?? "")
+                    Text(block.blockNumber.flatMap { "\($0)" } ?? "Pending")
                         .foregroundStyle(Color.primary)
                 }
 
-                
+                Text(block.timestamp)
+                    .font(.footnote)
+                    
             }
             Spacer()
         }
@@ -44,7 +46,48 @@ struct ExploreMainScreenView: View {
                         }
                     } header: {
                         Text("Latest Blocks")
-                    }.clipShape(.rect(cornerRadius: 5))
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.black)
+                    } footer: {
+                        
+                        Button {
+                            
+                        } label: {
+                            HStack {
+                               Text("View all blocks".uppercased())
+                                    .font(.headline.weight(.bold))
+                                    .foregroundStyle(.gray)
+                                
+                                Image(systemName: "arrow.right")
+                                    .tint(.gray)
+                            }
+                        }
+                    }
+                    
+                    Section {
+                        ForEach(viewModel.latestBlocks) { block in
+                            blockView(block)
+                        }
+                    } header: {
+                        Text("Latest Transactions")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.black)
+                    } footer: {
+                        
+                        Button {
+                            
+                        } label: {
+                            HStack {
+                               Text("View all transactions".uppercased())
+                                    .font(.headline.weight(.bold))
+                                    .foregroundStyle(.gray)
+                                
+                                Image(systemName: "arrow.right")
+                                    .tint(.gray)
+                            }
+                        }
+
+                    }
                     
                 }.listStyle(.insetGrouped)
                     .navigationTitle("See result")

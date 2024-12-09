@@ -42,17 +42,28 @@ public struct EthConnector: Sendable {
             throw EthError.invalidResponse(responseData)
         }
         
-        guard httpResponse.statusCode == 200 else {
-            throw EthError.httpStatusCode(httpResponse.statusCode)
+        let statusCode = httpResponse.statusCode
+        guard statusCode == 200 else {
+            if statusCode == 503 {
+                //retry ...
+                debugPrint("!!! 503  \(httpResponse.allHeaderFields)")
+            }
+            throw EthError.httpStatusCode(statusCode)
         }
         
         let decoder = JSONDecoder()
-        let result = try decoder.decode(EthMethodSwiftResult<Result>.self, from: responseData)
-        guard result.id == id else {
-            throw EthError.invalidId(expected: id, real: result.id)
+        do {
+            let result = try decoder.decode(EthMethodSwiftResult<Result>.self, from: responseData)
+            guard result.id == id else {
+                throw EthError.invalidId(expected: id, real: result.id)
+            }
+            return try result.methodResult()
+            
+        } catch {
+            
+            print("!!! can't handle \(String(data: responseData, encoding: .utf8) ?? "nil")")
+            throw error
         }
-        
-        return try result.methodResult()
     }
     
     private func ethMethodRun(id idCore: UInt64? = nil, method: EthMethod) async throws -> EthMethodResult<UInt64> {
@@ -76,7 +87,6 @@ public struct EthConnector: Sendable {
     }
     
     public func ethBlockByNumber(id idCore: UInt64? = nil, tag: BlockTag = .latest, full: Bool = false) async throws -> EthMethodResult<EthBlockObjectResult> {
-        //TODO: change here...
         try await ethMethodParams(id: idCore,
                                   method: .history(.blockByNumber),
                                   params: [EncodableValue](arrayLiteral: .string(tag.rawValue),

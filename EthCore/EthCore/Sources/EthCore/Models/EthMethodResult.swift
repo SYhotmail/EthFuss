@@ -65,8 +65,70 @@ extension EthMethodSwiftResult: Decodable where T: Decodable {
     }
 }
 
+public struct EthTransactionObjectResult: Decodable, Sendable {
+    // Common Fields
+    public let hash: String             // Transaction hash
+    public let nonce: UInt64            // Transaction nonce
+    public let blockHash: String?       // Hash of the block containing this transaction
+    public let blockNumber: UInt64?     // Block number (optional if pending)
+    public let transactionIndex: UInt64? // Index of the transaction in the block
+    
+    public let from: String             // Sender's address
+    public let to: String?              // Recipient's address (nil for contract creation)
+    public let value: String            // Value transferred in wei (String to avoid precision issues)
+    public let gas: UInt64              // Gas limit
+    public let gasPrice: String         // Gas price in wei (String to avoid precision issues)
+    
+    // Optional Fields for Input and Signature
+    public let input: String            // Data payload (hex string)
+    public let v: String?               // Recovery ID (part of the signature)
+    public let r: String?               // ECDSA signature r value
+    public let s: String?               // ECDSA signature s value
+}
+
+
+/*
+ struct Block: Codable {
+     let number: String // Hexadecimal string
+     let hash: String?
+     let parentHash: String
+     let nonce: String
+     let sha3Uncles: String
+     let logsBloom: String
+     let transactions: [Transaction] // Array of transactions (can be full or hashes depending on request)
+     let transactionsRoot: String?
+     let stateRoot: String?
+     let miner: String?
+     let difficulty: String?
+     let totalDifficulty: String?
+     let extraData: String?
+     let size: String?
+     let gasLimit: String?
+     let gasUsed: String?
+     let timestamp: String // Unix timestamp in hexadecimal format
+     let uncles: [String] // Array of uncle block hashes
+ }
+ */
 
 public struct EthBlockObjectResult: Decodable, Sendable {
     public let miner: String //20bytes.. - 42 characters...
     public let number: String?
+    public let timestamp: String
+    
+    public enum TransactionInfoState: Decodable, Sendable {
+        case raw(address: String)
+        case object(_ object: EthTransactionObjectResult)
+        
+        public init(from decoder: any Decoder) throws {
+            
+            if let container = try? decoder.singleValueContainer(), let raw = try? container.decode(String.self) {
+                self = .raw(address: raw)
+            } else {
+                let transactionObject = try EthTransactionObjectResult(from: decoder)
+                self = .object(transactionObject)
+            }
+        }
+    }
+    
+    public let transactions: [TransactionInfoState]
 }
