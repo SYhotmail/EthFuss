@@ -124,8 +124,12 @@ public struct EthBlockObjectResult: Decodable, Sendable {
             if let container = try? decoder.singleValueContainer(), let raw = try? container.decode(String.self) {
                 self = .raw(address: raw)
             } else {
-                let transactionObject = try EthTransactionObjectResult(from: decoder)
-                self = .object(transactionObject)
+                do {
+                    let transactionObject = try EthTransactionObjectResult(from: decoder)
+                    self = .object(transactionObject)
+                } catch {
+                    throw error
+                }
             }
         }
     }

@@ -14,7 +14,7 @@ struct ExploreMainScreenView: View {
     @ObservedObject var viewModel: ExploreMainScreenViewModel
     
     @ViewBuilder
-    func blockView(_ block: ExploreMainScreenViewModel.BlockItem) -> some View {
+    func blockView(_ block: ExploreMainScreenViewModel.BlockViewModel) -> some View {
         HStack {
             Image(systemName: "cube.fill")
             
@@ -32,6 +32,11 @@ struct ExploreMainScreenView: View {
             }
             Spacer()
         }
+    }
+    
+    @ViewBuilder
+    func transactionView(_ transaction: ExploreMainScreenViewModel.TransactionViewModel) -> some View {
+        
     }
     
     

@@ -7,6 +7,7 @@
 
 import Foundation
 import EthCore
+import Combine
 
 final class ExploreMainScreenViewModel: ObservableObject {
     
@@ -15,40 +16,101 @@ final class ExploreMainScreenViewModel: ObservableObject {
         case mined
     }
     
-    struct TransactionItem: Identifiable {
-        let hash: String
+    
+    struct TransactionViewModel: Identifiable {
         var id: String { hash }
+        let hash: String
+        let from: String?
+        let to: String?
+        let value: String //ETh...
+        let timestampSubject = CurrentValueSubject<String?, Never>(nil)
+        
+        nonmutating func setTimestampRaw(_ raw: String) {
+            guard let unixTimestampRaw = try? raw.hexToUInt64() else {
+                return
+            }
+            timestampSubject.value = Self.timeAgo(unixTimestamp: TimeInterval(unixTimestampRaw))
+        }
+        
+        init(hash: String, from: String?, to: String?, value: String) {
+            self.hash = hash
+            self.from = from
+            self.to = to
+            self.value = value
+        }
+        
+        init?(transactionObject: EthTransactionObjectResult) {
+            self.init(hash: transactionObject.hash,
+                      from: transactionObject.from,
+                      to: transactionObject.to,
+                      value: transactionObject.value)
+        }
+        
+        static func timeAgo(unixTimestamp: TimeInterval) -> String {
+            let interval = Date().timeIntervalSince(Date(timeIntervalSince1970: unixTimestamp))
+            assert(interval >= 0)
+            return .init(format: "%0.f mins ago", interval/60) //TODO: support localization etc...
+        }
     }
     
-    struct BlockItem: Identifiable {
+    struct BlockViewModel: Identifiable {
+        
+        enum TransactionInfo {
+            case raw(hash: String)
+            case viewModel(_ viewModel: TransactionViewModel)
+            
+            var isViewModel: Bool {
+                viewModel != nil
+            }
+            
+            var viewModel: TransactionViewModel? {
+                if case .viewModel(let innerVM) = self {
+                    return innerVM
+                }
+                return nil
+            }
+        }
+        
         let id: String
         let blockNumber: UInt64?
         let timestamp: String
         let blockState: BlockState
+        let transactions: [TransactionInfo]
         
-        init(blockNumber: UInt64?,
-             unixTimestamp: TimeInterval) {
+        private init(blockNumber: UInt64?,
+                     unixTimestamp: TimeInterval,
+                     transactions: [TransactionInfo]) {
             self.blockNumber = blockNumber
             self.id = blockNumber?.hexString() ?? UUID().uuidString
             
             blockState = blockNumber != 0 ? .mined : .pending
-            
-            let interval = Date(timeIntervalSince1970: unixTimestamp).timeIntervalSinceNow
-            assert(interval <= 0)
-            timestamp = String(format: "%0.f mins ago", abs(interval/60)) //TODO: support localization etc...
+            timestamp = TransactionViewModel.timeAgo(unixTimestamp: unixTimestamp)
+            self.transactions = transactions
         }
         
         init?(blockObject: EthBlockObjectResult) {
             guard let unixTimestampRaw = try? blockObject.timestamp.hexToUInt64() else {
                 return nil
             }
+            
             self.init(blockNumber: try? blockObject.number?.hexToUInt64(),
-                      unixTimestamp: TimeInterval(unixTimestampRaw))
+                      unixTimestamp: TimeInterval(unixTimestampRaw),
+                      transactions: blockObject.transactions.compactMap { transactionObj in
+                switch transactionObj {
+                case .raw(address: let address):
+                    return .raw(hash: address)
+                case .object(let transactionObject):
+                    guard let viewModel = TransactionViewModel(transactionObject: transactionObject) else {
+                        return nil
+                    }
+                    return .viewModel(viewModel)
+                }
+            })
         }
     }
     
-    @Published var latestBlocks = [BlockItem]()
-    @Published var transactions = [TransactionItem]()
+    @Published var latestBlocks = [BlockViewModel]()
+    @Published var transactions = [TransactionViewModel]()
     
     let connector = EthConnector()
     let blockCount: Int
@@ -66,7 +128,18 @@ final class ExploreMainScreenViewModel: ObservableObject {
         coreTask = Task {
             do {
                 let latestBlocks = try await receiveBlocks(number: blockCount)
+                
+                let transactions: [TransactionViewModel]!
+                if let fullBlock = latestBlocks.lazy.first(where: { block in block.transactions.contains { $0.isViewModel } }) {
+                    transactions = fullBlock.transactions.compactMap { $0.viewModel }
+                } else {
+                    transactions = nil
+                }
+                
                 Task { @MainActor in
+                    if let transactions {
+                        self.transactions = transactions
+                    }
                     self.latestBlocks = latestBlocks
                 }
             }
@@ -83,13 +156,11 @@ final class ExploreMainScreenViewModel: ObservableObject {
         coreTask.cancel()
     }
     
-    func receiveBlocks(number: Int) async throws -> [BlockItem] {
+    func receiveBlocks(number: Int) async throws -> [BlockViewModel] {
         guard number > 0 else {
             return []
         }
         let blockNumber = try await connector.ethBlockNumber().result
-        
-        //var items = [BlockItem?](repeating: nil, count: number)
         
         let items = try await withThrowingTaskGroup(of: EthBlockObjectResult.self) { group in
             for i in 0..<number {
@@ -110,7 +181,8 @@ final class ExploreMainScreenViewModel: ObservableObject {
         }
         
         let count = items.count
-        let retArray = items.compactMap { BlockItem(blockObject: $0) }.sorted { $0.id > $1.id } // last at top..
+        let retArray = items.compactMap { BlockViewModel(blockObject: $0) }.sorted { $0.id > $1.id } // last at top..
+        assert(retArray.first?.blockNumber == blockNumber)
         assert(count == retArray.count) //all blocks are not pending?
         return retArray
     }
