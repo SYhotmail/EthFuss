@@ -14,11 +14,6 @@ struct ExploreMainScreenView: View {
     @ObservedObject var viewModel: ExploreMainScreenViewModel
     
     @ViewBuilder
-    func blockView(_ block: ExploreMainScreenViewModel.BlockViewModel) -> some View {
-        ExploreMainScreenBlockRowView(viewModel: block)
-    }
-    
-    @ViewBuilder
     func transactionView(_ transaction: ExploreMainScreenViewModel.TransactionViewModel) -> some View {
         HStack {
             Image(systemName: "line.3.horizontal.button.angledtop.vertical.right")
@@ -31,7 +26,7 @@ struct ExploreMainScreenView: View {
             VStack {
                 NavigationLink(transaction.hash) {
                     //TODO: hash here...
-                    AddressScreenView(viewModel: transaction)
+                    AddressScreenView(viewModel: .init())
                 }
                 
                 if let timestamp = transaction.timestampSubject.value {
@@ -45,10 +40,10 @@ struct ExploreMainScreenView: View {
                     HStack {
                         Text("From")
                         NavigationLink {
-                            AddressScreenView(viewModel: transaction)
+                            AddressScreenView(viewModel: .init())
                         } label: {
-                            Text(from).lineLimit(1)
-                                .truncationMode(.middle)
+                            Text(from)
+                                .singleLongLineText()
                         }
                     }
                 }
@@ -57,10 +52,10 @@ struct ExploreMainScreenView: View {
                     HStack {
                         Text("To")
                         NavigationLink {
-                            AddressScreenView(viewModel: transaction)
+                            AddressScreenView(viewModel: .init())
                         } label: {
-                            Text(to).lineLimit(1)
-                                .truncationMode(.middle)
+                            Text(to)
+                                .singleLongLineText()
                         }
                     }
                 }
@@ -83,12 +78,12 @@ struct ExploreMainScreenView: View {
                 
                 List {
                     Section {
-                        ForEach(viewModel.latestBlocks) { block in
-                            blockView(block)
+                        ForEach(viewModel.latestBlocks) { blockVM in
+                            ExploreMainScreenBlockRowView(viewModel: blockVM)
                         }
                     } header: {
                         Text("Latest Blocks")
-                            .font(.headline.weight(.bold))
+                            .font(.body.weight(.bold))
                             .foregroundStyle(.black)
                     } footer: {
                         
@@ -97,7 +92,7 @@ struct ExploreMainScreenView: View {
                         } label: {
                             HStack {
                                Text("View all blocks".uppercased())
-                                    .font(.headline.weight(.bold))
+                                    .font(.body.weight(.bold))
                                     .foregroundStyle(.gray)
                                 
                                 Image(systemName: "arrow.right")
@@ -112,7 +107,7 @@ struct ExploreMainScreenView: View {
                         }
                     } header: {
                         Text("Latest Transactions")
-                            .font(.headline.weight(.bold))
+                            .font(.body.weight(.bold))
                             .foregroundStyle(.black)
                     } footer: {
                         
@@ -121,18 +116,24 @@ struct ExploreMainScreenView: View {
                         } label: {
                             HStack {
                                Text("View all transactions".uppercased())
-                                    .font(.headline.weight(.bold))
+                                    .font(.body.weight(.bold))
                                     .foregroundStyle(.gray)
                                 
                                 Image(systemName: "arrow.right")
                                     .tint(.gray)
                             }
                         }
-
                     }
-                    
                 }.listStyle(.insetGrouped)
-                    .navigationTitle("See result")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar { // <2>
+                        ToolbarItem(placement: .principal) {
+                            Text(viewModel.title ?? "")
+                                .font(.headline)
+                        }
+                        
+                    }
+                    //.navigationTitle(viewModel.title ?? "")
                 
             }
         }

@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct AddressScreenView: View {
-    let viewModel: ExploreMainScreenViewModel.TransactionViewModel
+    let viewModel: AddressScreenViewModel
+    
     var body: some View {
         Text("Check")
     }

@@ -19,6 +19,11 @@ final class ExploreMainScreenViewModel: ObservableObject {
     let transactionCount: Int
     private var coreTask: Task<(), any Error>!
     
+    var title: String? {
+        let netType = connector.ethConfig.netType
+        return netType.name.flatMap { "\($0) Explorer" }
+    }
+    
     init(blockCount: Int = 5, transactionCount: Int = 5) {
         self.blockCount = blockCount
         self.transactionCount = transactionCount

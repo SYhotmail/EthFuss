@@ -5,14 +5,14 @@ import Foundation
 
 public struct EthConnector: Sendable {
     /// configuration: configuration of the network...
-    let ethConfig: EthConfiguration
+    public let ethConfig: EthConfiguration
     
     let network: URLSession
     let postRequest: URLRequest
     
-    public init(ethConfig: EthConfiguration = .init(url: EthConfiguration.Test.sepolia.url), config: URLSessionConfiguration? = nil) {
+    public init(ethConfig: EthConfiguration = .init(netType: .test(.sepolia)), config: URLSessionConfiguration? = nil) {
         self.ethConfig = ethConfig
-        let url = ethConfig.url
+        let url = ethConfig.netType.url
         
         var postRequest = URLRequest(url: url)
         postRequest.httpMethod = "POST"
@@ -99,13 +99,20 @@ public struct EthConnector: Sendable {
 }
 
 public struct EthConfiguration: Sendable {
-    public enum Test {
+    public enum Test: Sendable {
         case sepolia
         
         var host: String {
             switch self {
             case .sepolia:
                 return "rpc.sepolia.org"
+            }
+        }
+        
+        var name: String? {
+            switch self {
+            case .sepolia:
+                return "Sepolia Testnet"
             }
         }
         
@@ -117,15 +124,36 @@ public struct EthConfiguration: Sendable {
         }
     }
     
-    /// url of the network.
-    let url: URL
+    public enum NetType: Sendable {
+        case mainnet(url: URL)
+        case test(_ raw: Test)
+        
+        var url: URL {
+            switch self {
+            case .mainnet(let url):
+                return url
+            case .test(let raw):
+                return raw.url
+            }
+        }
+        
+        public var name: String? {
+            if case .test(let test) = self {
+                return test.name
+            }
+            return nil
+        }
+    }
+    
+    /// net type.
+    public let netType: NetType
     
     let jsonRPCVersion: JSONRPCVersionInfo
     
-    public init(url: URL,
+    public init(netType: NetType,
                 jsonRPCVersion: JSONRPCVersionInfo = .init(major: 2,
                                                            minor: 0)) {
-        self.url = url
+        self.netType = netType
         self.jsonRPCVersion = jsonRPCVersion
     }
 }

@@ -9,6 +9,9 @@ import Foundation
 import Combine
 import EthCore
 
+
+typealias ExploreMainScreenRowViewModel = ExploreMainScreenViewModel.BlockViewModel
+
 extension ExploreMainScreenViewModel {
     enum BlockState {
         case pending
@@ -33,7 +36,12 @@ extension ExploreMainScreenViewModel {
             timestampSubject.value = Self.timeAgo(unixTimestamp: TimeInterval(unixTimestampRaw))
         }
         
-        init(hash: String, from: String?, to: String?, value: String, gas: String, gasPrice: String) {
+        init(hash: String,
+             from: String?,
+             to: String?,
+             value: String,
+             gas: String,
+             gasPrice: String) {
             self.hash = hash
             self.from = from
             self.to = to
@@ -119,22 +127,25 @@ extension ExploreMainScreenViewModel {
         let timestamp: String
         let blockState: BlockState
         let reward: String?
+        let miner: String
         let transactions: [TransactionInfo]
         let burnedFee: Decimal?
         let uncles: [String]
         
         @Published var transactionReward: String?
         
-        private init(blockNumber: UInt64?,
-                     unixTimestamp: TimeInterval,
-                     reward: String?,
-                     burnedFee: Decimal?,
-                     uncles: [String],
-                     transactions: [TransactionInfo]) {
+        init(blockNumber: UInt64?,
+             unixTimestamp: TimeInterval,
+             reward: String?,
+             miner: String,
+             burnedFee: Decimal?,
+             uncles: [String],
+             transactions: [TransactionInfo]) {
             
             self.burnedFee = burnedFee
             self.blockNumber = blockNumber
             self.uncles = uncles
+            self.miner = miner
             self.id = blockNumber?.hexString() ?? UUID().uuidString
             
             
@@ -148,8 +159,15 @@ extension ExploreMainScreenViewModel {
             scheduleTranscationRewardOnNeed()
         }
         
+        func onBlockPressed() {
+            
+        }
         
-        private /*nonmutating*/ func scheduleTranscationRewardOnNeed() {
+        func onRecipientPressed() {
+            
+        }
+        
+        private func scheduleTranscationRewardOnNeed() {
             let realTransactions = transactions.compactMap { $0.viewModel }
             
             guard !realTransactions.isEmpty else {
@@ -208,6 +226,7 @@ extension ExploreMainScreenViewModel {
             self.init(blockNumber: try? blockObject.number?.hexToUInt64(),
                       unixTimestamp: TimeInterval(unixTimestampRaw),
                       reward: blockObject.reward,
+                      miner: blockObject.miner,
                       burnedFee: try? blockObject.burnedFee(),
                       uncles: blockObject.uncles,
                       transactions: blockObject.transactions.compactMap { transactionObj in

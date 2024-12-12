@@ -7,22 +7,22 @@
 import SwiftUI
 
 struct ExploreMainScreenBlockRowView: View {
-    @ObservedObject var viewModel: ExploreMainScreenViewModel.BlockViewModel
+    @ObservedObject var viewModel: ExploreMainScreenRowViewModel
     
     var body: some View {
         HStack {
             Image(systemName: "cube")
+                .symbolEffect(.bounce, value: 1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
-                .background(.gray.opacity(0.5))
-                .clipShape(.rect(cornerSize: .init(width: 5, height: 5)))
+                .background(.gray.opacity(0.3))
+                .clipShape(.rect(cornerSize: .init(width: 10, height: 10)))
+                .layoutPriority(1)
             
             VStack {
-                Button {
-                    //action...
-                } label: {
+                Button(action: viewModel.onBlockPressed) {
                     Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
-                        .foregroundStyle(Color.primary)
+                        //.foregroundStyle(Color.)
                 }
 
                 Text(viewModel.timestamp)
@@ -31,6 +31,26 @@ struct ExploreMainScreenBlockRowView: View {
                     
             }
             .padding(.horizontal, 20)
+            
+            VStack {
+                HStack {
+                    Text("Fee Recipient")
+                    NavigationLink {
+                        AddressScreenView(viewModel: .init())
+                    } label: {
+                        Text(viewModel.miner)
+                            .singleLongLineText()
+                            .foregroundStyle(Color.blue)
+                    }
+
+                    /*Button(action: viewModel.onRecipientPressed) {
+                        Text(viewModel.miner)
+                            .singleLongLineText()
+                    }*/
+                }
+                
+                //viewModel.transactions.
+            }
             
             Spacer()
             
@@ -43,7 +63,7 @@ struct ExploreMainScreenBlockRowView: View {
                     .padding(.vertical, 5)
                     .overlay(
                                     RoundedRectangle(cornerRadius: 5)
-                                        .stroke(Color.black, lineWidth: 2) // Adds a blue border with rounded corners
+                                        .stroke(Color.gray, lineWidth: 1) // Adds a blue border with rounded corners
                                 )
                     //.border(, width: 1)
             }
