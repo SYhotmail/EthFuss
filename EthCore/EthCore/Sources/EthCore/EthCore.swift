@@ -119,6 +119,7 @@ public struct EthConfiguration: Sendable {
     
     /// url of the network.
     let url: URL
+    
     let jsonRPCVersion: JSONRPCVersionInfo
     
     public init(url: URL,

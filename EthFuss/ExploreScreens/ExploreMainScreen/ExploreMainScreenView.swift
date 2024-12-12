@@ -15,28 +15,65 @@ struct ExploreMainScreenView: View {
     
     @ViewBuilder
     func blockView(_ block: ExploreMainScreenViewModel.BlockViewModel) -> some View {
-        HStack {
-            Image(systemName: "cube.fill")
-            
-            VStack {
-                Button {
-                    //action...
-                } label: {
-                    Text(block.blockNumber.flatMap { "\($0)" } ?? "Pending")
-                        .foregroundStyle(Color.primary)
-                }
-
-                Text(block.timestamp)
-                    .font(.footnote)
-                    
-            }
-            Spacer()
-        }
+        ExploreMainScreenBlockRowView(viewModel: block)
     }
     
     @ViewBuilder
     func transactionView(_ transaction: ExploreMainScreenViewModel.TransactionViewModel) -> some View {
-        
+        HStack {
+            Image(systemName: "line.3.horizontal.button.angledtop.vertical.right")
+                .padding(.horizontal, 10)
+                .padding(.vertical, 10)
+                .clipShape(.rect(cornerSize: .init(width: 5, height: 5)))
+            
+            
+            
+            VStack {
+                NavigationLink(transaction.hash) {
+                    //TODO: hash here...
+                    AddressScreenView(viewModel: transaction)
+                }
+                
+                if let timestamp = transaction.timestampSubject.value {
+                    Text(timestamp)
+                        .font(.footnote)
+                }
+            }
+            
+            VStack {
+                if let from = transaction.from {
+                    HStack {
+                        Text("From")
+                        NavigationLink {
+                            AddressScreenView(viewModel: transaction)
+                        } label: {
+                            Text(from).lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                    }
+                }
+                
+                if let to = transaction.to {
+                    HStack {
+                        Text("To")
+                        NavigationLink {
+                            AddressScreenView(viewModel: transaction)
+                        } label: {
+                            Text(to).lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            
+            
+            
+            /*if let weiValue = transaction.value.hexToUInt64() {
+                
+            }*/
+            
+        } //hstack
     }
     
     
@@ -71,9 +108,7 @@ struct ExploreMainScreenView: View {
                     
                     Section {
                         ForEach(viewModel.transactions) { transaction in
-                            //blockView(block)
-                            //TODO:
-                            Text("Add support")
+                            transactionView(transaction)
                         }
                     } header: {
                         Text("Latest Transactions")
@@ -101,34 +136,6 @@ struct ExploreMainScreenView: View {
                 
             }
         }
-        
-        
-        /*NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationTitle("Items")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            EthTopologhyView()
-        } detail: {
-            Text("Select an item")
-        } */
     }
 
 }

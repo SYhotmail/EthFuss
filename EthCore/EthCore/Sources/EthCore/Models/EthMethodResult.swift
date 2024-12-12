@@ -111,9 +111,36 @@ public struct EthTransactionObjectResult: Decodable, Sendable {
  */
 
 public struct EthBlockObjectResult: Decodable, Sendable {
-    public let miner: String //20bytes.. - 42 characters...
     public let number: String?
-    public let timestamp: String
+    public let hash: String                 // The hash of the block
+    public let parentHash: String           // The hash of the parent block
+    public let nonce: String                // The block nonce (for PoW blocks)
+    public let sha3Uncles: String           // Hash of the uncles in the block
+    public let logsBloom: String?           // Bloom filter for logs (optional)
+    public let transactionsRoot: String     // Root of the transaction trie
+    public let stateRoot: String            // Root of the state trie
+    public let receiptsRoot: String         // Root of the receipts trie
+    public let miner: String                // Address of the miner
+    public let difficulty: String           // Difficulty of the block
+    public let totalDifficulty: String      // Total difficulty of the chain up to this block
+    public let extraData: String?            // Extra data field of the block
+    public let size: String                 // Size of the block in bytes
+    public let gasLimit: String             // Maximum gas allowed in the block
+    public let gasUsed: String              // Gas used by all transactions in the block
+    public let timestamp: String            // Block timestamp (in seconds since epoch)
+    public let uncles: [String]             // Array of uncle block hashes
+    public let reward: String? //if available...
+    public let baseFeePerGas: String
+    
+    public nonmutating func burnedFee() throws -> Decimal? {
+        let gasHex = try gasUsed.hexToUInt64()
+        let feePerGas = try baseFeePerGas.hexToUInt64()
+        guard let gasHex, let feePerGas else {
+            return nil
+        }
+        
+        return Decimal(gasHex) * Decimal(feePerGas)
+    }
     
     public enum TransactionInfoState: Decodable, Sendable {
         case raw(address: String)

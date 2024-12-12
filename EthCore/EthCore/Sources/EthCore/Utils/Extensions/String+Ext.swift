@@ -11,7 +11,6 @@ public extension String {
     func hexToUInt64(prefix prefixStr: String = "0x") throws -> UInt64? {
         let raw = self
         let cleanedHexString = raw.hasPrefix(prefixStr) ? String(raw.dropFirst(prefixStr.count)) : raw
-        
         guard let value = UInt64(cleanedHexString, radix: 16) else {
             throw EthError.invalidResponse(raw.data(using: .utf8))
         }
