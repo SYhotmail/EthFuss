@@ -20,9 +20,13 @@ struct ExploreMainScreenBlockRowView: View {
                 .layoutPriority(1)
             
             VStack {
-                Button(action: viewModel.onBlockPressed) {
-                    Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
-                        //.foregroundStyle(Color.)
+                if let blockObject = viewModel.blockObject {
+                    NavigationLink {
+                        EthBlockDetailedView(viewModel: .init(blockObject: blockObject))
+                    } label: {
+                        Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
+                            .foregroundStyle(Color.blue)
+                    }
                 }
 
                 Text(viewModel.timestamp)

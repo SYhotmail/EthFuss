@@ -159,13 +159,6 @@ extension ExploreMainScreenViewModel {
             scheduleTranscationRewardOnNeed()
         }
         
-        func onBlockPressed() {
-            
-        }
-        
-        func onRecipientPressed() {
-            
-        }
         
         private func scheduleTranscationRewardOnNeed() {
             let realTransactions = transactions.compactMap { $0.viewModel }
