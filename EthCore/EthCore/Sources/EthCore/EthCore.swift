@@ -86,11 +86,36 @@ public struct EthConnector: Sendable {
         try await ethMethodRun(id: idCore, method: .gossip(.blobBaseFee))
     }
     
-    public func ethBlockByNumber(id idCore: UInt64? = nil, tag: BlockTag = .latest, full: Bool = false) async throws -> EthMethodResult<EthBlockObjectResult> {
-        try await ethMethodParams(id: idCore,
-                                  method: .history(.blockByNumber),
-                                  params: [EncodableValue](arrayLiteral: .string(tag.rawValue),
-                                                                        .bool(full)))
+    private func ethBlockByNumberOrHash(id idCore: UInt64? = nil,
+                                        tag: BlockTag!,
+                                        hash: String!,
+                                        full: Bool = false) async throws -> EthMethodResult<EthBlockObjectResult> {
+        assert((tag != nil && hash == nil) || (tag == nil && hash != nil) )
+        let paramStr: String! = tag?.rawValue ?? hash
+        assert(paramStr != nil)
+        return try await ethMethodParams(id: idCore,
+                                         method: .history(tag != nil ? .blockByNumber : .blockByHash),
+                                         params: [EncodableValue](arrayLiteral: .string(paramStr),
+                                                                                .bool(full)))
+    }
+    
+    public func ethBlockByNumber(id: UInt64? = nil,
+                                 tag: BlockTag = .latest,
+                                 full: Bool = false) async throws -> EthMethodResult<EthBlockObjectResult> {
+        try await ethBlockByNumberOrHash(id: id,
+                                         tag: tag,
+                                         hash: nil,
+                                         full: full)
+    }
+    
+    //TODO: hash has containts 32 bytes, check it...
+    public func ethBlockByHash(id: UInt64? = nil,
+                               hash: String,
+                               full: Bool = false) async throws -> EthMethodResult<EthBlockObjectResult> {
+        try await ethBlockByNumberOrHash(id: id,
+                                         tag: nil,
+                                         hash: hash,
+                                         full: full)
     }
     
     public func ethAccounts(id idCore: UInt64? = nil) async throws -> EthMethodResult<[String]> {

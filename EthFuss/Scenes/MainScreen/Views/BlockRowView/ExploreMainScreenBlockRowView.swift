@@ -8,7 +8,8 @@ import SwiftUI
 
 struct ExploreMainScreenBlockRowView: View {
     @ObservedObject var viewModel: ExploreMainScreenRowViewModel
-    
+    @State var activateLinkBlock = false
+    @State var activateLinkRecipient = false
     var body: some View {
         HStack {
             Image(systemName: "cube")
@@ -20,16 +21,18 @@ struct ExploreMainScreenBlockRowView: View {
                 .layoutPriority(1)
             
             VStack {
-                if let blockObject = viewModel.blockObject {
-                    NavigationLink {
-                        EthBlockDetailedView(viewModel: .init(blockObject: blockObject))
-                    } label: {
-                        Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
-                            .foregroundStyle(Color.blue)
-                    }
+                if let blockVM = viewModel.blockDetailViewModel() {
+                    Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
+                        .foregroundStyle(Color.blue)
+                        .navigationDestination(isPresented: $activateLinkBlock) {
+                            EthBlockDetailedView(viewModel: blockVM)
+                        }
+                        .onTapGesture {
+                            activateLinkBlock = true
+                        }
                 }
 
-                Text(viewModel.timestamp)
+                Text(viewModel.timestampTitle)
                     .foregroundStyle(.gray)
                     .font(.footnote)
                     
@@ -39,21 +42,16 @@ struct ExploreMainScreenBlockRowView: View {
             VStack {
                 HStack {
                     Text("Fee Recipient")
-                    NavigationLink {
-                        AddressScreenView(viewModel: .init())
-                    } label: {
-                        Text(viewModel.miner)
-                            .singleLongLineText()
-                            .foregroundStyle(Color.blue)
-                    }
-
-                    /*Button(action: viewModel.onRecipientPressed) {
-                        Text(viewModel.miner)
-                            .singleLongLineText()
-                    }*/
+                    Text(viewModel.miner)
+                        .singleLongLineText()
+                        .foregroundStyle(Color.blue)
+                        .navigationDestination(isPresented: $activateLinkRecipient) {
+                            AddressScreenView(viewModel: .init(address: viewModel.miner))
+                        }
+                        .onTapGesture {
+                            activateLinkRecipient = true
+                        }
                 }
-                
-                //viewModel.transactions.
             }
             
             Spacer()

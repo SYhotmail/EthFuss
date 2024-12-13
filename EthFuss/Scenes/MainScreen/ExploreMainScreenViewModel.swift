@@ -13,11 +13,11 @@ final class ExploreMainScreenViewModel: ObservableObject {
     
     @Published var latestBlocks = [BlockViewModel]()
     @Published var transactions = [TransactionViewModel]()
+    @Published var isLoading = false
     
     let connector = EthConnector()
     let blockCount: Int
     let transactionCount: Int
-    private var coreTask: Task<(), any Error>!
     
     var title: String? {
         let netType = connector.ethConfig.netType
@@ -32,7 +32,8 @@ final class ExploreMainScreenViewModel: ObservableObject {
     }
     
     private func defineCoreTask() {
-        coreTask = Task {
+        isLoading = true
+        Task {
             do {
                 let latestBlocks = try await receiveBlocks(number: blockCount)
                 
@@ -48,19 +49,14 @@ final class ExploreMainScreenViewModel: ObservableObject {
                         self.transactions = transactions
                     }
                     self.latestBlocks = latestBlocks
+                    self.isLoading = false
                 }
             }
             catch {
+                self.isLoading = false
                 debugPrint("!!! Error \(error)")
             }
         }
-    }
-    
-    private func cancelCoreTask() {
-        guard let coreTask, !coreTask.isCancelled else {
-            return
-        }
-        coreTask.cancel()
     }
     
     func receiveBlocks(number: Int) async throws -> [BlockViewModel] {
@@ -88,7 +84,7 @@ final class ExploreMainScreenViewModel: ObservableObject {
         }
         
         let count = items.count
-        let retArray = items.compactMap { BlockViewModel(blockObject: $0) }.sorted { $0.id > $1.id } // last at top..
+        let retArray = items.compactMap { BlockViewModel(blockObject: $0) }.sorted { $0.unixTimestamp > $1.unixTimestamp } // last at top..
         assert(retArray.first?.blockNumber == blockNumber)
         assert(count == retArray.count) //all blocks are not pending?
         return retArray

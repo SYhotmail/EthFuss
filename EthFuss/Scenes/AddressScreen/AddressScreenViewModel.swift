@@ -9,5 +9,9 @@ import SwiftUI
 import Combine
 
 final class AddressScreenViewModel: ObservableObject {
-    let address: String = ""
+    let address: String
+    
+    init(address: String) {
+        self.address = address
+    }
 }

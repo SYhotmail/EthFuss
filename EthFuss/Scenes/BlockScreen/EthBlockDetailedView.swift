@@ -9,9 +9,30 @@ import SwiftUI
 
 struct EthBlockDetailedView: View {
     @ObservedObject var viewModel: EthBlockDetailedViewModel
-    var body: some View {
+    
+    @ViewBuilder var contentView: some View {
         List {
-            
-        }.navigationTitle(viewModel.title ?? "")
+            Section {
+                VStack {
+                    
+                }
+            }
+            //.animation(.default, value: <#T##V#>)
+        }.listStyle(.insetGrouped)
+    }
+    
+    @ViewBuilder var bodyCore: some View {
+        if viewModel.isLoading {
+            ProgressView()
+                .tint(.gray)
+        } else {
+            contentView
+                .transition(.move(edge: .leading))
+        }
+    }
+    
+    var body: some View {
+        bodyCore
+            .navigationTitle(viewModel.title ?? "")
     }
 }

@@ -7,12 +7,13 @@
 
 import Combine
 import EthCore
+import Foundation
 
 typealias ExploreMainScreenTransactionViewModel = ExploreMainScreenViewModel.TransactionViewModel
 
 extension ExploreMainScreenViewModel {
     
-    struct TransactionViewModel: Identifiable {
+    final class TransactionViewModel: ObservableObject, Identifiable {
         var id: String { hash }
         let hash: String
         let from: String?
@@ -22,7 +23,7 @@ extension ExploreMainScreenViewModel {
         let gasPrice: String
         let timestampSubject = CurrentValueSubject<String?, Never>(nil)
         
-        nonmutating func setTimestampRaw(_ raw: String) {
+        func setTimestampRaw(_ raw: String) {
             guard let unixTimestampRaw = try? raw.hexToUInt64() else {
                 return
             }
@@ -43,7 +44,7 @@ extension ExploreMainScreenViewModel {
             self.gasPrice = gasPrice
         }
         
-        init?(transactionObject: EthTransactionObjectResult) {
+        convenience init?(transactionObject: EthTransactionObjectResult) {
             self.init(hash: transactionObject.hash,
                       from: transactionObject.from,
                       to: transactionObject.to,
@@ -52,7 +53,7 @@ extension ExploreMainScreenViewModel {
                       gasPrice: transactionObject.gasPrice)
         }
         
-        nonmutating func transactionFee() throws -> Decimal? {
+        func transactionFee() throws -> Decimal? {
             let gasHex = try gas.hexToUInt64()
             let gasPriceHex = try gasPrice.hexToUInt64()
             guard let gasHex, let gasPriceHex else {
@@ -60,6 +61,10 @@ extension ExploreMainScreenViewModel {
             }
             
             return Decimal(gasHex) * Decimal(gasPriceHex)
+        }
+        
+        func addressViewModel(_ address: String) -> AddressScreenViewModel {
+            .init(address: address)
         }
         
         static func timeAgo(unixTimestamp: TimeInterval) -> String {

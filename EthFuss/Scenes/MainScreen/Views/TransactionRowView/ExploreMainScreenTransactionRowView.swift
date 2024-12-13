@@ -8,7 +8,21 @@
 import SwiftUI
 
 struct ExploreMainScreenTransactionRowView: View {
-    @ObservedObject viewModel: 
+    @ObservedObject var viewModel: ExploreMainScreenTransactionViewModel
+    
+    @ViewBuilder
+    private func addressView(_ address: String, title: String) -> some View {
+        HStack {
+            Text(title)
+            NavigationLink {
+                AddressScreenView(viewModel: viewModel.addressViewModel(address))
+            } label: {
+                Text(address)
+                    .singleLongLineText()
+            }
+        }
+    }
+    
     var body: some View {
         HStack {
             Image(systemName: "line.3.horizontal.button.angledtop.vertical.right")
@@ -19,40 +33,24 @@ struct ExploreMainScreenTransactionRowView: View {
             
             
             VStack {
-                NavigationLink(transaction.hash) {
+                NavigationLink(viewModel.hash) {
                     //TODO: hash here...
-                    AddressScreenView(viewModel: .init())
+                    //AddressScreenView(viewModel: .init())
                 }
                 
-                if let timestamp = transaction.timestampSubject.value {
+                if let timestamp = viewModel.timestampSubject.value {
                     Text(timestamp)
                         .font(.footnote)
                 }
             }
             
             VStack {
-                if let from = transaction.from {
-                    HStack {
-                        Text("From")
-                        NavigationLink {
-                            AddressScreenView(viewModel: .init())
-                        } label: {
-                            Text(from)
-                                .singleLongLineText()
-                        }
-                    }
+                if let from = viewModel.from {
+                    addressView(from, title: "From")
                 }
                 
-                if let to = transaction.to {
-                    HStack {
-                        Text("To")
-                        NavigationLink {
-                            AddressScreenView(viewModel: .init())
-                        } label: {
-                            Text(to)
-                                .singleLongLineText()
-                        }
-                    }
+                if let to = viewModel.to {
+                    addressView(to, title: "To")
                 }
             }
             .padding(.horizontal, 20)

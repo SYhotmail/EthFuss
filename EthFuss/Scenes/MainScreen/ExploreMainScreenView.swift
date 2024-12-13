@@ -13,20 +13,24 @@ struct ExploreMainScreenView: View {
     @Query private var items: [Item]
     @ObservedObject var viewModel: ExploreMainScreenViewModel
     
-    //TODO: here...
-    @ViewBuilder
-    func transactionView(_ transaction: ExploreMainScreenTransactionViewModel) -> some View {
-        ExploreMainScreenTransactionRowView(viewModel: transaction)
-    }
-    
     
     var body: some View {
+        if viewModel.isLoading {
+            ProgressView()
+                .progressViewStyle(.circular)
+        } else {
+            bodyCore
+        }
+    }
+    
+    @ViewBuilder var bodyCore: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 List {
                     Section {
                         ForEach(viewModel.latestBlocks) { blockVM in
                             ExploreMainScreenBlockRowView(viewModel: blockVM)
+                                .selectionDisabled()
                         }
                     } header: {
                         Text("Latest Blocks")
@@ -50,7 +54,8 @@ struct ExploreMainScreenView: View {
                     
                     Section {
                         ForEach(viewModel.transactions) { transaction in
-                            transactionView(transaction)
+                            ExploreMainScreenTransactionRowView(viewModel: transaction)
+                                .selectionDisabled()
                         }
                     } header: {
                         Text("Latest Transactions")
@@ -74,7 +79,6 @@ struct ExploreMainScreenView: View {
                 }
                 //.tint(.clear)
                 .listStyle(.insetGrouped)
-                .selectionDisabled()
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar { // <2>
                         ToolbarItem(placement: .principal) {
@@ -88,7 +92,6 @@ struct ExploreMainScreenView: View {
             }
         }
     }
-
 }
 
 #Preview {

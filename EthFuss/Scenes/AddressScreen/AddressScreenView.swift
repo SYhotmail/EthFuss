@@ -8,9 +8,16 @@
 import SwiftUI
 
 struct AddressScreenView: View {
-    let viewModel: AddressScreenViewModel
+    @ObservedObject var viewModel: AddressScreenViewModel
+    
+    init(viewModel: AddressScreenViewModel) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         Text("Check")
+            .onAppear {
+                debugPrint("!!! Appeared")
+            }
     }
 }

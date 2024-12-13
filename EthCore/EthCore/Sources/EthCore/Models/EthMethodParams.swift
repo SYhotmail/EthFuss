@@ -104,6 +104,7 @@ enum EthMethod {
     
     enum History: String {
         case blockByNumber
+        case blockByHash
     }
     
     case gossip(_ method: Gossip)
