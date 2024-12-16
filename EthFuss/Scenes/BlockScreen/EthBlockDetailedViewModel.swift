@@ -94,10 +94,10 @@ final class EthBlockDetailedViewModel: ObservableObject {
                                                          hasNext: self.hasNext()) ))
                 }
                 
-                if let totalDifficulty = result?.totalDifficulty, let size = result?.size {
-                    info.append(.init(type: .difficulty(toolTip: "Total difficulty of chain",
+                if let totalDifficulty = result?.totalDifficulty {
+                    info.append(.init(type: .difficulty(toolTip: "Total difficulty of the chain",
                                                         label: "Total Difficulty:",
-                                                        number: /*totalDifficulty*/ size) )) //TODO: check..
+                                                        number: totalDifficulty) ))
                 }
                 
                 return info

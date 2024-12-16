@@ -44,11 +44,14 @@ public struct EthConnector: Sendable {
         
         let statusCode = httpResponse.statusCode
         guard statusCode == 200 else {
+            var retry: TimeInterval?
             if statusCode == 503 {
                 //retry ...
+                retry = httpResponse.value(forHTTPHeaderField: "max_age").flatMap { .init($0) }
                 debugPrint("!!! 503  \(httpResponse.allHeaderFields)")
             }
-            throw EthError.httpStatusCode(statusCode)
+            throw EthError.httpStatusCode(statusCode,
+                                          retryInterval: retry)
         }
         
         let decoder = JSONDecoder()

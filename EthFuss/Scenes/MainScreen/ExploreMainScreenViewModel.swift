@@ -14,6 +14,8 @@ final class ExploreMainScreenViewModel: ObservableObject {
     @Published var latestBlocks = [BlockViewModel]()
     @Published var transactions = [TransactionViewModel]()
     @Published var isLoading = false
+    @Published var alertError: Error?
+    @Published var presentAlert = false
     
     let connector = EthConnector()
     let blockCount: Int
@@ -53,10 +55,19 @@ final class ExploreMainScreenViewModel: ObservableObject {
                 }
             }
             catch {
-                self.isLoading = false
-                debugPrint("!!! Error \(error)")
+                Task { @MainActor in
+                    self.isLoading = false
+                    self.alertError = error
+                    self.presentAlert = true
+                    debugPrint("!!! Error \(error)")
+                }
             }
         }
+    }
+    
+    func onAlertPressed() {
+        presentAlert = false
+        alertError = nil
     }
     
     func receiveBlocks(number: Int) async throws -> [BlockViewModel] {

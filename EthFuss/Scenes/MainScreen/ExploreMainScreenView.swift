@@ -20,6 +20,12 @@ struct ExploreMainScreenView: View {
                 .progressViewStyle(.circular)
         } else {
             bodyCore
+                .alert(viewModel.alertError?.localizedDescription ?? "",
+                       isPresented: $viewModel.presentAlert, actions: {
+                    
+                    Button("OK",
+                           action: viewModel.onAlertPressed)
+                })
         }
     }
     
@@ -87,8 +93,6 @@ struct ExploreMainScreenView: View {
                         }
                         
                     }
-                    //.navigationTitle(viewModel.title ?? "")
-                
             }
         }
     }

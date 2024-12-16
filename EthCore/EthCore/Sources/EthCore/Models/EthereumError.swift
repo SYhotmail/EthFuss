@@ -94,7 +94,8 @@ extension EthereumError: Decodable {
 
 public enum EthError: Error {
     case invalidResponse(_ data: Data?)
-    case httpStatusCode(_ code: Int)
+    case httpStatusCode(_ code: Int,
+                        retryInterval: TimeInterval?)
     case invalidId(expected: UInt64, real: UInt64?)
     case ethereumError(model: EthereumError)
     
