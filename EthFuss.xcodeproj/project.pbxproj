@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2139096E2CFCE3B5000C68D8 /* EthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2139096D2CFCE3B5000C68D8 /* EthCore */; };
+		21794B882D11F0610095DE46 /* ReadMe.md in Resources */ = {isa = PBXBuildFile; fileRef = 21794B872D11F0610095DE46 /* ReadMe.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		21794B872D11F0610095DE46 /* ReadMe.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ReadMe.md; sourceTree = "<group>"; };
 		21A504FD2CFC838900A95494 /* EthFuss.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EthFuss.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21A5050F2CFC838D00A95494 /* EthFussTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EthFussTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21A505192CFC838E00A95494 /* EthFussUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EthFussUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +83,7 @@
 		21A504F42CFC838900A95494 = {
 			isa = PBXGroup;
 			children = (
+				21794B872D11F0610095DE46 /* ReadMe.md */,
 				21A5052F2CFC852900A95494 /* EthCore */,
 				21A504FF2CFC838900A95494 /* EthFuss */,
 				21A505122CFC838D00A95494 /* EthFussTests */,
@@ -224,6 +227,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21794B882D11F0610095DE46 /* ReadMe.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
