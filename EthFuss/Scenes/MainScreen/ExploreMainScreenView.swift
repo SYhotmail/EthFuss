@@ -13,6 +13,7 @@ struct ExploreMainScreenView: View {
     @Query private var items: [Item]
     @ObservedObject var viewModel: ExploreMainScreenViewModel
     
+    @State var showUnderConstruction = false
     
     var body: some View {
         if viewModel.isLoading {
@@ -20,10 +21,15 @@ struct ExploreMainScreenView: View {
                 .progressViewStyle(.circular)
         } else {
             bodyCore
-                .alert(viewModel.alertError?.localizedDescription ?? "",
+                .alert("Not implemented", isPresented: $showUnderConstruction) {
+                    Button("OK",
+                           role: .cancel) {}
+                }
+                .alert(viewModel.alertErrorText ?? "",
                        isPresented: $viewModel.presentAlert, actions: {
                     
                     Button("OK",
+                           role: .cancel,
                            action: viewModel.onAlertPressed)
                 })
         }
@@ -43,18 +49,19 @@ struct ExploreMainScreenView: View {
                             .font(.body.weight(.bold))
                             .foregroundStyle(.black)
                     } footer: {
-                        
                         Button {
-                            
+                            showUnderConstruction = true
                         } label: {
                             HStack {
                                Text("View all blocks".uppercased())
+                                    .padding(.horizontal, 2)
+                                    .padding(.vertical, 5)
                                     .font(.body.weight(.bold))
                                     .foregroundStyle(.gray)
                                 
                                 Image(systemName: "arrow.right")
                                     .tint(.gray)
-                            }
+                            }.contentMargins(5)
                         }
                     }
                     
@@ -70,16 +77,18 @@ struct ExploreMainScreenView: View {
                     } footer: {
                         
                         Button {
-                            
+                            showUnderConstruction = true
                         } label: {
                             HStack {
                                Text("View all transactions".uppercased())
+                                    .padding(.horizontal, 2)
+                                    .padding(.vertical, 5)
                                     .font(.body.weight(.bold))
                                     .foregroundStyle(.gray)
                                 
                                 Image(systemName: "arrow.right")
                                     .tint(.gray)
-                            }
+                            }.contentMargins(5)
                         }
                     }
                 }

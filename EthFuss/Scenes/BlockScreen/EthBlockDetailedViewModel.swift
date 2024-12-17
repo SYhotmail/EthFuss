@@ -27,14 +27,30 @@ final class EthBlockDetailedViewModel: ObservableObject {
     }
         
     enum TopSectionRowType {
+        enum Inner {
+            case blockHeight
+            case difficult
+            case blockSize
+        }
+        
+        func prevNextBlockHeightButtons() -> (hasPrevious: Bool, hasNext: Bool)? {
+            if case .blockHeight(_, _, _, let hasPrevious, let hasNext) = self {
+                return (hasPrevious: hasPrevious, hasNext: hasNext)
+            }
+            return nil
+        }
+        
         case blockHeight(toolTip: String, label: String, number: String, hasPrevious: Bool, hasNext: Bool)
         case difficulty(toolTip: String, label: String, number: String)
+        case blockSize(toolTip: String, label: String, number: String) //tooltip, label, number is kind of a pattern...
         
         var toolTip: String {
             switch self {
             case let .blockHeight(toolTip, _, _, _, _):
                 return toolTip
             case let .difficulty(toolTip, _, _):
+                return toolTip
+            case .blockSize(let toolTip, _, _):
                 return toolTip
             }
         }
@@ -45,6 +61,30 @@ final class EthBlockDetailedViewModel: ObservableObject {
                 return label
             case let .difficulty(_, label, _):
                 return label
+            case let .blockSize(_, label, _):
+                return label
+            }
+        }
+        
+        var innerSize: Inner {
+            switch self {
+            case .blockHeight:
+                return .blockHeight
+            case .blockSize:
+                return .blockSize
+            case .difficulty:
+                return .difficult
+            }
+        }
+        
+        var number: String {
+            switch self {
+            case let .blockHeight(_, _, number, _, _):
+                return number
+            case let .difficulty(_, _, number):
+                return number
+            case let .blockSize(_, _, number):
+                return number
             }
         }
     }
@@ -100,6 +140,12 @@ final class EthBlockDetailedViewModel: ObservableObject {
                                                         number: totalDifficulty) ))
                 }
                 
+                if let size = result?.size {
+                    info.append(.init(type: .difficulty(toolTip: "Size in bytes",
+                                                        label: "Size:",
+                                                        number: size) ))
+                }
+                
                 return info
             }
             .receive(on: DispatchQueue.main)
@@ -141,6 +187,7 @@ final class EthBlockDetailedViewModel: ObservableObject {
             } catch {
                 await self.setIsLoadingUI(false)
                 //TODO: key not found therefore last is a prev. one...
+                debugPrint("Error \(#function) \(error)")
                 throw error
             }
         }

@@ -48,6 +48,11 @@ public struct EthConnector: Sendable {
             if statusCode == 503 {
                 //retry ...
                 retry = httpResponse.value(forHTTPHeaderField: "max_age").flatMap { .init($0) }
+                if retry == nil {
+                    if let dic = httpResponse.allHeaderFields["report-to"] as? [String: Any], let value = dic["max_age"] as? String {
+                        retry = .init(value)
+                    }
+                }
                 debugPrint("!!! 503  \(httpResponse.allHeaderFields)")
             }
             throw EthError.httpStatusCode(statusCode,

@@ -9,8 +9,8 @@ import SwiftUI
 
 
 extension Text {
-    func singleLongLineText() -> some View {
+    func singleLongLineText(truncationMode mode: Text.TruncationMode = .middle) -> some View {
             lineLimit(1)
-            .truncationMode(.middle)
+            .truncationMode(mode)
     }
 }

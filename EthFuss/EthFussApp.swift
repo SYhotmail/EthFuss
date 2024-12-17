@@ -26,7 +26,18 @@ struct EthFussApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ExploreMainScreenView(viewModel: .init())
+            TabView {
+                ExploreMainScreenView(viewModel: .init())
+                    .tabItem {
+                        Label("Home", systemImage: "house")
+                    }
+                
+                EthTopologhyView()
+                    .tabItem {
+                        Label("View", systemImage: "photo")
+                    }
+            }
+            
         }
         .modelContainer(sharedModelContainer)
     }

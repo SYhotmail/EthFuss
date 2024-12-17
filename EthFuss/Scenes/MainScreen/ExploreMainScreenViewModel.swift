@@ -14,12 +14,12 @@ final class ExploreMainScreenViewModel: ObservableObject {
     @Published var latestBlocks = [BlockViewModel]()
     @Published var transactions = [TransactionViewModel]()
     @Published var isLoading = false
-    @Published var alertError: Error?
+    @Published var alertErrorText: String?
     @Published var presentAlert = false
     
     let connector = EthConnector()
-    let blockCount: Int
-    let transactionCount: Int
+    private let blockCount: Int
+    private let transactionCount: Int
     
     var title: String? {
         let netType = connector.ethConfig.netType
@@ -57,7 +57,11 @@ final class ExploreMainScreenViewModel: ObservableObject {
             catch {
                 Task { @MainActor in
                     self.isLoading = false
-                    self.alertError = error
+                    if case EthError.httpStatusCode(503, _) = error {
+                        self.alertErrorText = "Retry Later"
+                    } else {
+                        self.alertErrorText = error.localizedDescription
+                    }
                     self.presentAlert = true
                     debugPrint("!!! Error \(error)")
                 }
@@ -67,7 +71,7 @@ final class ExploreMainScreenViewModel: ObservableObject {
     
     func onAlertPressed() {
         presentAlert = false
-        alertError = nil
+        alertErrorText = nil
     }
     
     func receiveBlocks(number: Int) async throws -> [BlockViewModel] {

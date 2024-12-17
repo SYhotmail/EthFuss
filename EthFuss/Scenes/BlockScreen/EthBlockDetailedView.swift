@@ -9,65 +9,79 @@ import SwiftUI
 
 struct EthBlockDetailedView: View {
     @ObservedObject var viewModel: EthBlockDetailedViewModel
-    @State var blockHeightFrame: CGRect = .zero // coupld be used from VM... dic for each type..
-    @State var blockDifficultyFrame: CGRect = .zero // coupld be used from VM... dic for each type..
-    @State var isHeightPopup: Bool?
-    @State var toolTipText: String?
-    @Namespace var innerNamespace
+    //@State var isShowing = [EthBlockDetailedViewModel.TopSectionRowType.Inner: Bool]()
+    @State var isShowingBlockHeight = false
+    @State var isShowingDifficult = false
+    @State var isShowingSize = false
     
-    @ViewBuilder
     private func toolTipButtonView(_ toolTip: String,
                                    label: String,
-                                   frameBinding: Binding<CGRect>,
-                                   isHeight: Bool?) -> some View {
-        FrameObservingView(coordinateSpace: .named(innerNamespace),
-                           frame: frameBinding) {
-            Button(label, systemImage: "questionmark.circle") {
-                toolTipText = toolTip
-                isHeightPopup = isHeight
-            }.foregroundStyle(.black)
-                .tint(.black)
+                                   inner: EthBlockDetailedViewModel.TopSectionRowType.Inner,
+                                   binding: Binding<Bool>) -> some View {
+        return Button(label, systemImage: "questionmark.circle") {
+            isShowingBlockHeight = false
+            isShowingDifficult = false
+            isShowingSize = false
+            binding.wrappedValue = true
+            switch inner { //TODO: why binding is not enough?
+            case .blockHeight:
+                isShowingBlockHeight = true
+            case .difficult:
+                isShowingDifficult = true
+            case .blockSize:
+                isShowingSize  = true
+            }
+            assert([isShowingDifficult, isShowingBlockHeight, isShowingSize].count(where: { $0 }) == 1)
+            //TODO: fixme why not all popovers are shown iOS 18.2 (Simulator)
+        }.foregroundStyle(.black)
+            .buttonStyle(.plain)
+            .tint(.black)
+            .popover(isPresented: binding) {
+            Text(toolTip)
+                .padding(.horizontal, 10)
+                .clipShape(.rect(cornerRadius: .init(5)))
+                .presentationCompactAdaptation((.popover))
         }
     }
     
-    @ViewBuilder
-    private func rowView(_ info: EthBlockDetailedViewModel.TopSectionRowInfo) -> some View {
+    
+    private func binding(_ info: EthBlockDetailedViewModel.TopSectionRowInfo) -> Binding<Bool> {
         switch info.type {
-        case .blockHeight(let toolTip, let label, let number, let hasPrevious, let hasNext):
-            HStack {
-                toolTipButtonView(toolTip,
-                                  label: label,
-                                  frameBinding: $blockHeightFrame,
-                                  isHeight: true)
-                .layoutPriority(1)
-                
-                Spacer()
-                
-                Text(number)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+        case .blockHeight:
+            $isShowingBlockHeight
+        case .difficulty:
+            $isShowingDifficult
+        case .blockSize:
+            $isShowingSize
+        }
+    }
+    
+    
+    private func rowView(_ info: EthBlockDetailedViewModel.TopSectionRowInfo) -> some View {
+        let tuple = info.type.prevNextBlockHeightButtons()
+        return HStack {
+            toolTipButtonView(info.type.toolTip,
+                              label: info.type.label,
+                              inner: info.type.innerSize,
+                              binding: binding(info))
+            .layoutPriority(1)
+            
+            Spacer()
+            
+            Text(info.type.number)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            
+            if let tuple  {
                 
                 Image(systemName: "arrowshape.backward")
                     .padding(5)
-                    .opacity(hasPrevious ? 1 : 0.5)
+                    .opacity(tuple.hasPrevious ? 1 : 0.5)
                     .onTapGesture(perform: viewModel.loadPrev)
-                
+            
                 Image(systemName: "arrowshape.forward")
                     .padding(5)
-                    .opacity(hasNext ? 1 : 0.5)
+                    .opacity(tuple.hasNext ? 1 : 0.5)
                     .onTapGesture(perform: viewModel.loadNext)
-                
-            }
-        case .difficulty(let toolTip, let label, let number):
-            HStack {
-                toolTipButtonView(toolTip,
-                                  label: label,
-                                  frameBinding: $blockDifficultyFrame,
-                                  isHeight: false)
-                .layoutPriority(1)
-                
-                Spacer()
-                
-                Text(number)
             }
         }
     }
@@ -79,6 +93,7 @@ struct EthBlockDetailedView: View {
                     VStack(spacing: 0) {
                         ForEach(viewModel.topSectionRows) {
                             rowView($0)
+                                .selectionDisabled()
                                 .transition(.move(edge: .leading))
                                 .animation(.default, value: viewModel.topSectionRows.count)
                         }
@@ -87,33 +102,6 @@ struct EthBlockDetailedView: View {
             }
         }
         .listStyle(.insetGrouped)
-        .coordinateSpace(.named(innerNamespace))
-        .overlay() {
-                if let toolTipText, let isHeightPopup {
-                    Color.black.opacity(0.2).ignoresSafeArea(edges:. vertical)
-                        .onTapGesture {
-                            withAnimation {
-                                self.toolTipText = nil //reset...
-                                self.isHeightPopup = nil
-                            }
-                        }
-                    Text(toolTipText)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color.white)
-                        .clipShape(.rect(cornerRadius: .init(5)))
-                        .alignmentGuide(HorizontalAlignment.center, computeValue: { d in
-                            let origin = (isHeightPopup ? blockHeightFrame : blockDifficultyFrame).origin
-                            return -(origin.x - d[HorizontalAlignment.center])
-                        })
-                        .alignmentGuide(VerticalAlignment.center, computeValue: { _ in
-                            /*let origin = (isHeightPopup ? blockHeightFrame : blockDifficultyFrame).origin
-                            return (origin.y - d[VerticalAlignment.center])*/
-                            return 0
-                        })
-                        //.position((isHeightPopup ? blockHeightFrame : blockDifficultyFrame).origin)
-                }
-            }
     }
     
     
@@ -126,7 +114,6 @@ struct EthBlockDetailedView: View {
                     .tint(.gray)
             }
         }
-            //.transition(.move(edge: .leading))
     }
     
     var body: some View {

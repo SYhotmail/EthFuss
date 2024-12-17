@@ -20,26 +20,26 @@ struct ExploreMainScreenBlockRowView: View {
                 .clipShape(.rect(cornerSize: .init(width: 10, height: 10)))
                 .layoutPriority(1)
             
-            VStack {
-                if let blockVM = viewModel.blockDetailViewModel() {
+            VStack(alignment: .leading) {
+                HStack {
                     Text(viewModel.blockNumber.flatMap { String($0) } ?? "Pending")
                         .foregroundStyle(Color.blue)
                         .navigationDestination(isPresented: $activateLinkBlock) {
-                            EthBlockDetailedView(viewModel: blockVM)
+                            EthBlockDetailedView(viewModel: viewModel.blockDetailViewModel())
                         }
                         .onTapGesture {
                             activateLinkBlock = true
                         }
-                }
-
-                Text(viewModel.timestampTitle)
-                    .foregroundStyle(.gray)
-                    .font(.footnote)
                     
-            }
-            .padding(.horizontal, 20)
-            
-            VStack {
+                    
+                    Spacer()
+
+                    Text(viewModel.timestampTitle)
+                        .foregroundStyle(.gray)
+                        .font(.footnote)
+                }
+                
+                
                 HStack {
                     Text("Fee Recipient")
                     Text(viewModel.miner)
@@ -52,6 +52,7 @@ struct ExploreMainScreenBlockRowView: View {
                             activateLinkRecipient = true
                         }
                 }
+                
             }
             
             Spacer()

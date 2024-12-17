@@ -86,29 +86,9 @@ public struct EthTransactionObjectResult: Decodable, Sendable {
     public let s: String?               // ECDSA signature s value
 }
 
+// TODO: address can be validated as ^0x[0-9a-fA-F]{40}$
 
-/*
- struct Block: Codable {
-     let number: String // Hexadecimal string
-     let hash: String?
-     let parentHash: String
-     let nonce: String
-     let sha3Uncles: String
-     let logsBloom: String
-     let transactions: [Transaction] // Array of transactions (can be full or hashes depending on request)
-     let transactionsRoot: String?
-     let stateRoot: String?
-     let miner: String?
-     let difficulty: String?
-     let totalDifficulty: String?
-     let extraData: String?
-     let size: String?
-     let gasLimit: String?
-     let gasUsed: String?
-     let timestamp: String // Unix timestamp in hexadecimal format
-     let uncles: [String] // Array of uncle block hashes
- }
- */
+//TODO: hash 32 hex encoded bytes Pattern: ^0x[0-9a-f]{64}$
 
 public struct EthBlockObjectResult: Decodable, Sendable {
     public let number: String?

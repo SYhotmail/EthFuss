@@ -39,19 +39,6 @@ struct PulsedLineView: View {
             LineView(point1: point1,
                      point2: point2)
             
-            /*GeometryReader { proxy in
-                let path = LineView.path(point1: point1,
-                                         point2: point2)
-                Rectangle()
-                    .fill(Color.blue)
-                    .frame(width: 2, height: 2)
-                    //.scaleEffect(.init(2))
-                    .position(/*Self.positionOnPath(path,
-                                                  at: animationProgress) */
-                        Self.positionOnPath(point1: point1,
-                                            point2: point2,
-                                            at: animationProgress))
-            } */
             Rectangle()
                 .fill(Color.blue)
                 .frame(width: 2, height: 2)
@@ -72,7 +59,7 @@ struct PulsedLineView: View {
     static func positionOnPath(point1: CGPoint,
                                point2: CGPoint,
                                at progress: CGFloat) -> CGPoint {
-            var vector = CGPoint(x: point2.x - point1.x,
+            let vector = CGPoint(x: point2.x - point1.x,
                                  y: point2.y - point1.y)
             
             let d = sqrt(vector.x * vector.x + vector.y * vector.y)
@@ -81,14 +68,6 @@ struct PulsedLineView: View {
                 return point1
             }
         
-            //vector.x /= d
-            //vector.y /= d
-        
-            //assert((vector.x * vector.x + vector.y * vector.y) == 1.0)
-            
-            /*let trimmedPath = path.trimmedPath(from: 0, to: progress)
-            return trimmedPath.currentPoint ?? .zero */
-            
             return .init(x: point1.x + progress * vector.x,
                          y: point1.y + progress * vector.y)
         }
@@ -188,13 +167,13 @@ struct EthTopologhyView: View {
     @ViewBuilder
     private func computerView() -> some View {
         Image(systemName: "desktopcomputer")
-        //.tint(.red)
             .aspectRatio(contentMode: .fill)
             .scaledToFill()
             .scaleEffect(animateNodes ? 1.5 : 0)
             .symbolEffect(.bounce, value: 2)
             .background(Capsule().fill(Color.white))
     }
+    
     
     var bodyLeftPart: some View {
         GeometryReader { proxy in
@@ -205,14 +184,37 @@ struct EthTopologhyView: View {
                     computerView().alignmentGuide(.top) { dimensions in
                         dimensions[.top] + 50
                     }.padding(.horizontal, 10)
+                    
+                    VStack {
+                        //Spacer()
+                        Text("JSON - RPC")
+                            .font(.headline)
+                            .offset(x: 0, y: 0)
+                            .zIndex(1) //in front...
+                        
+                        Image(systemName: "cloud.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundStyle(Color.blue.tertiary.opacity(0.5))
+                            .symbolEffect(.breathe, options: .repeating)
+                            .frame(size: .init(width: proxy.size.width * 0.8, height: proxy.size.height * 0.5))
+                            .opacity(0.9)
+                        
+                        //Spacer()
+                    }.fixedSize(horizontal: false, vertical: true)
+                        //.symbolEffect(.appear, value: 2)
+                    /*
                     CloudShape()
                                 .fill(Color.blue.opacity(0.3))
+                                .frame(size: .init(width: 200, height: 200))
                                 .overlay(
                                     CloudShape()
                                         .stroke(Color.blue,
                                                 lineWidth: 2)
+                                        .frame(size: .init(width: 200, height: 200))
                                 )
                                 .padding()
+                     */
                 }
                 
             }
@@ -245,22 +247,6 @@ struct EthTopologhyView: View {
                 
             }
         }.onAppear {
-            /*withAnimation {
-                animateNodes = true
-            } completion: {
-                rotateThem = true
-            }*/
-            /*withAnimation {
-                animateNodes = true
-            } completion: {
-                withAnimation {
-                    rotateThem = true
-                } completion: {
-                    animateConnectors = true
-                }
-
-            }*/
-
             animateNodes = true
             rotateThem = true
             animateConnectors = true
@@ -274,6 +260,8 @@ struct EthTopologhyView: View {
 }
 
 // MARK: - CloudShape
+
+/*
 struct CloudShape: Shape {
     func path(in rect: CGRect) -> Path {
         Path { path in
@@ -305,7 +293,7 @@ struct CloudShape: Shape {
                                        height: height * 0.5))
         }
     }
-}
+} */
 
 extension View {
     func frame(size: CGSize,
